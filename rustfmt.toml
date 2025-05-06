@@ -1,0 +1,33 @@
+# Use Rust 2021 edition-style formatting
+edition = "2021"
+
+# Indentation and spacing
+hard_tabs = false
+tab_spaces = 4
+max_width = 120
+
+# Control how function arguments and return types are wrapped
+fn_args_layout = "Tall"
+fn_call_width = 80
+
+# Controls how imports are grouped and ordered
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
+
+# Enforce trailing commas in multi-line lists
+trailing_comma = "Always"
+
+# Control the formatting of match arms
+match_arm_blocks = true
+match_block_trailing_comma = true
+
+# Preserve comments and documentation layout
+normalize_comments = true
+wrap_comments = true
+format_code_in_doc_comments = true
+
+# Other recommended settings
+use_field_init_shorthand = true
+newline_style = "Unix"
+force_multiline_blocks = true
+reorder_impl_items = true

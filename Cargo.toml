@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "rushstr",         # binary crate
+    "rushstr-core",    # core logic as a library
+    "rushstr-tui",     # optional TUI interface logic
+]
+
+resolver = "2"
