@@ -7,5 +7,3 @@ edition = "2024"
 anyhow.workspace = true
 thiserror.workspace = true
 ratatui.workspace = true
-crossterm.workspace = true
-ctrlc.workspace = true
