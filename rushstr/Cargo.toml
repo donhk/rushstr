@@ -7,3 +7,5 @@ edition = "2024"
 anyhow.workspace = true
 thiserror.workspace = true
 ratatui.workspace = true
+rushstr-core = { path = "../rushstr-core" }
+rushstr-tui = { path = "../rushstr-tui" }

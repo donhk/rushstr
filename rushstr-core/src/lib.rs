@@ -1,14 +1,11 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+mod stores;
+mod types;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[doc(inline)]
+pub use stores::store_trait::StoreTrait;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+#[doc(inline)]
+pub use stores::vector_store::VectorStore;
+
+#[doc(inline)]
+pub use types::common_types::Store;
