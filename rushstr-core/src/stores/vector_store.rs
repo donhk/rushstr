@@ -1,12 +1,15 @@
 use crate::stores::store_trait::StoreTrait;
 
 pub struct VectorStore {
-    all_items: [&'static str; 100],
+    all_items: [&'static str; 103],
 }
 
 impl VectorStore {
     pub fn new() -> VectorStore {
         let all_items = [
+            "sudo echo \"hola\"",
+            "time",
+            "ping localhost",
             "git status",
             "git commit -m 'Initial commit'",
             "git push origin main",
@@ -113,13 +116,26 @@ impl VectorStore {
 }
 
 impl StoreTrait for VectorStore {
-    fn filter_items(&self, input: &str) -> Vec<String> {
+    fn filter_items(&self, input: &str, case_insensitive: bool) -> Vec<String> {
         if input.is_empty() {
-            return self.all_items.iter().take(100).map(|item| item.to_string()).collect();
+            return self.all_items.iter().take(50).map(|item| item.to_string()).collect();
         }
+
+        let input = if case_insensitive {
+            input.to_lowercase()
+        } else {
+            input.to_string()
+        };
+
         self.all_items
             .iter()
-            .filter(|item| item.contains(input))
+            .filter(|item| {
+                if case_insensitive {
+                    item.to_lowercase().contains(&input)
+                } else {
+                    item.contains(&input)
+                }
+            })
             .map(|item| item.to_string())
             .collect()
     }
