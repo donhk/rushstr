@@ -1,4 +1,9 @@
+use fuzzy_matcher::FuzzyMatcher;
+use fuzzy_matcher::skim::SkimMatcherV2;
+
 use crate::SearchOptions;
+use crate::SearchType;
+use crate::prepare_string;
 use crate::stores::store_trait::StoreTrait;
 
 pub struct VectorStore {
@@ -114,10 +119,40 @@ impl VectorStore {
         ];
         VectorStore { all_items }
     }
-}
 
-impl StoreTrait for VectorStore {
-    fn filter_items(&self, search_options: &SearchOptions) -> Vec<String> {
+    pub fn filter_items_monkey(&self, search_options: &SearchOptions) -> Vec<String> {
+        let matcher = SkimMatcherV2::default();
+
+        if search_options.text.is_empty() {
+            return self.all_items.iter().take(50).map(|item| item.to_string()).collect();
+        }
+
+        let input = if search_options.is_case_insensitive() {
+            prepare_string(&search_options.text).to_lowercase()
+        } else {
+            prepare_string(&search_options.text)
+        };
+
+        let mut matches: Vec<(String, i64)> = self
+            .all_items
+            .iter()
+            .filter_map(|item| {
+                let target = if search_options.is_case_insensitive() {
+                    item.to_lowercase()
+                } else {
+                    item.to_string()
+                };
+                matcher.fuzzy_match(&target, &input).map(|score| (target, score))
+            })
+            .collect();
+
+        // Optional: sort by score descending
+        matches.sort_by(|a, b| b.1.cmp(&a.1));
+
+        matches.into_iter().map(|(item, _score)| item.to_string()).collect()
+    }
+
+    pub fn filter_items_exact(&self, search_options: &SearchOptions) -> Vec<String> {
         if search_options.text.is_empty() {
             return self.all_items.iter().take(50).map(|item| item.to_string()).collect();
         }
@@ -139,6 +174,39 @@ impl StoreTrait for VectorStore {
             })
             .map(|item| item.to_string())
             .collect()
+    }
+
+    pub fn filter_items_regex(&self, search_options: &SearchOptions) -> Vec<String> {
+        if search_options.text.is_empty() {
+            return self.all_items.iter().take(50).map(|item| item.to_string()).collect();
+        }
+
+        let pattern = if search_options.is_case_insensitive() {
+            format!("(?i){}", search_options.text)
+        } else {
+            search_options.text.clone()
+        };
+
+        let re = match regex::Regex::new(&pattern) {
+            Ok(re) => re,
+            Err(_) => return vec![], // return empty if the regex is invalid
+        };
+
+        self.all_items
+            .iter()
+            .filter(|item| re.is_match(item))
+            .map(|item| item.to_string())
+            .collect()
+    }
+}
+
+impl StoreTrait for VectorStore {
+    fn filter_items(&self, search_options: &SearchOptions) -> Vec<String> {
+        match search_options.search_type {
+            SearchType::MonkeyTyping => self.filter_items_monkey(search_options),
+            SearchType::Exact => self.filter_items_exact(search_options),
+            SearchType::Regex => self.filter_items_regex(search_options),
+        }
     }
 
     fn total(&self) -> usize {

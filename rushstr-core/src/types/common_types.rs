@@ -1,5 +1,5 @@
-use crate::StoreTrait;
 use std::sync::Arc;
 
-pub type Store = Arc<dyn StoreTrait>;
+use crate::StoreTrait;
 
+pub type Store = Arc<dyn StoreTrait>;
