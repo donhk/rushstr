@@ -1,8 +1,15 @@
-use crate::ux::search_ui::UiState;
 use ratatui::Frame;
-use ratatui::layout::{Position, Rect};
-use ratatui::prelude::{Color, Line, Span, Style};
-use ratatui::widgets::{Block, Borders, Paragraph};
+use ratatui::layout::Position;
+use ratatui::layout::Rect;
+use ratatui::prelude::Color;
+use ratatui::prelude::Line;
+use ratatui::prelude::Span;
+use ratatui::prelude::Style;
+use ratatui::widgets::Block;
+use ratatui::widgets::Borders;
+use ratatui::widgets::Paragraph;
+
+use crate::ux::search_ui::UiState;
 
 pub struct SearchBox<'f> {
     search_options: &'f UiState,

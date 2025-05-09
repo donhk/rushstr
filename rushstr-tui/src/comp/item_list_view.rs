@@ -1,8 +1,19 @@
-use crate::ux::search_ui::UiState;
+use std::collections::HashSet;
+
 use ratatui::Frame;
 use ratatui::layout::Rect;
-use ratatui::prelude::{Color, Line, Modifier, Span, Style};
-use ratatui::widgets::{Block, Borders, List, ListItem};
+use ratatui::prelude::Color;
+use ratatui::prelude::Line;
+use ratatui::prelude::Modifier;
+use ratatui::prelude::Span;
+use ratatui::prelude::Style;
+use ratatui::widgets::Block;
+use ratatui::widgets::Borders;
+use ratatui::widgets::List;
+use ratatui::widgets::ListItem;
+use rushstr_core::prepare_string;
+
+use crate::ux::search_ui::UiState;
 
 pub struct ItemListView<'f> {
     items: &'f [String],
@@ -34,55 +45,83 @@ impl<'f> ItemListView<'f> {
         let list_items: Vec<ListItem> = items
             .into_iter()
             .enumerate()
-            .map(|(i, item)| self.format_item(i, item, text, selected))
+            .map(|(i, item)| format_item(i, item, text, selected))
             .collect();
 
         let list = List::new(list_items).block(Block::default().borders(Borders::NONE));
 
         frame.render_widget(list, self.layout[2]);
     }
+}
 
-    fn format_item(&self, i: usize, item: String, text: &str, selected: usize) -> ListItem {
-        let style = if i == selected {
-            Style::default()
-                .bg(Color::LightYellow)
-                .fg(Color::Black)
-                .add_modifier(Modifier::BOLD)
-        } else {
-            Style::default()
-        };
+pub(crate) fn format_item(i: usize, item: String, text: &str, selected: usize) -> ListItem {
+    let style = if i == selected {
+        Style::default()
+            .bg(Color::LightYellow)
+            .fg(Color::Black)
+            .add_modifier(Modifier::BOLD)
+    } else {
+        Style::default()
+    };
 
-        let line = if !text.is_empty() {
-            let mut spans = Vec::new();
-            let mut remaining = item.as_str();
-            let mut last_offset = 0;
+    let line = if !text.is_empty() {
+        let c_text = prepare_string(text);
+        let spans = match_tokens(&item, &c_text);
+        Line::from(spans)
+    } else {
+        Line::raw(item)
+    };
 
-            while let Some(pos) = remaining.find(text) {
-                let abs_pos = last_offset + pos;
+    ListItem::new(line).style(style)
+}
 
-                if pos > 0 {
-                    spans.push(Span::raw(item[last_offset..abs_pos].to_string()));
-                }
-
-                let match_end = abs_pos + text.len();
-                spans.push(Span::styled(
-                    item[abs_pos..match_end].to_string(),
-                    Style::default().fg(Color::Red),
-                ));
-
-                last_offset = match_end;
-                remaining = &item[last_offset..];
-            }
-
-            if last_offset < item.len() {
-                spans.push(Span::raw(item[last_offset..].to_string()));
-            }
-
-            Line::from(spans)
-        } else {
-            Line::raw(item)
-        };
-
-        ListItem::new(line).style(style)
+pub(crate) fn create_tokens(text: &str) -> HashSet<char> {
+    let mut tokens = HashSet::new();
+    for token in text.split_whitespace().filter(|t| !t.is_empty()) {
+        for c in token.chars() {
+            tokens.insert(c);
+        }
     }
+    tokens
+}
+
+pub(crate) fn token_finder(item: &str, text: &str) -> Vec<(String, bool)> {
+    let tokens = create_tokens(text);
+    let mut result = Vec::new();
+    let mut current = String::new();
+    let mut current_flag: Option<bool> = None;
+
+    for c in item.chars() {
+        let flag = tokens.contains(&c);
+        match current_flag {
+            Some(f) if f != flag => {
+                result.push((current.clone(), f));
+                current.clear();
+            },
+            None => {},
+            _ => {},
+        }
+        current.push(c);
+        current_flag = Some(flag);
+    }
+
+    if let Some(flag) = current_flag {
+        result.push((current, flag));
+    }
+
+    result
+}
+
+pub(crate) fn match_tokens<'a>(item: &str, text: &str) -> Vec<Span<'a>> {
+    let mut spans = Vec::new();
+    let styled_flags = token_finder(item, text);
+    for (str, red) in styled_flags {
+        let span = if red {
+            Span::styled(str, Style::default().fg(Color::Red))
+        } else {
+            Span::raw(str)
+        };
+        spans.push(span);
+    }
+    spans
 }

@@ -1,9 +1,14 @@
-use crate::ux::search_ui::UiState;
 use ratatui::Frame;
 use ratatui::layout::Rect;
-use ratatui::prelude::{Color, Line, Modifier, Span, Style};
+use ratatui::prelude::Color;
+use ratatui::prelude::Line;
+use ratatui::prelude::Modifier;
+use ratatui::prelude::Span;
+use ratatui::prelude::Style;
 use ratatui::widgets::Paragraph;
 use rushstr_core::Store;
+
+use crate::ux::search_ui::UiState;
 
 pub struct InfoBar<'f> {
     items: &'f [String],
@@ -32,7 +37,7 @@ impl<'f> InfoBar<'f> {
         let matching = self.ui_state.search_options.search_type.to_str();
 
         let content = format!(
-            " HISTORY - match:{} (C-e) - case:{} (C-t) - {}/{}/0",
+            " HISTORY - (C-f) ⭐ (C-t) match:{:<15}- case:{:<15}  - {}/{}/0",
             matching,
             case,
             self.items.len(),
