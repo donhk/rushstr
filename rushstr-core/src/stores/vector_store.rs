@@ -1,3 +1,4 @@
+use crate::SearchOptions;
 use crate::stores::store_trait::StoreTrait;
 
 pub struct VectorStore {
@@ -116,21 +117,21 @@ impl VectorStore {
 }
 
 impl StoreTrait for VectorStore {
-    fn filter_items(&self, input: &str, case_insensitive: bool) -> Vec<String> {
-        if input.is_empty() {
+    fn filter_items(&self, search_options: &SearchOptions) -> Vec<String> {
+        if search_options.text.is_empty() {
             return self.all_items.iter().take(50).map(|item| item.to_string()).collect();
         }
 
-        let input = if case_insensitive {
-            input.to_lowercase()
+        let input = if search_options.is_case_insensitive() {
+            search_options.text.to_lowercase()
         } else {
-            input.to_string()
+            search_options.text.to_string()
         };
 
         self.all_items
             .iter()
             .filter(|item| {
-                if case_insensitive {
+                if search_options.is_case_insensitive() {
                     item.to_lowercase().contains(&input)
                 } else {
                     item.contains(&input)
