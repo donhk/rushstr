@@ -25,14 +25,14 @@ impl SearchType {
 
 #[derive(Debug, Clone)]
 pub struct SearchOptions {
-    pub text: String,
+    pub input: String,
     pub search_type: SearchType,
 }
 
 impl Default for SearchOptions {
     fn default() -> Self {
         SearchOptions {
-            text: "".to_string(),
+            input: "".to_string(),
             search_type: SearchType::MonkeyTyping,
         }
     }

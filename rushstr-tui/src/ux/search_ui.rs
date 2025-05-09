@@ -1,12 +1,21 @@
-use crate::ux::ui_render_engine::UiRenderEngine;
+use std::io::stdout;
+
 use arboard::Clipboard;
 use ratatui::DefaultTerminal;
-use ratatui::crossterm::event::{
-    DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
-};
-use ratatui::crossterm::{event, execute};
-use rushstr_core::{SearchOptions, Store};
-use std::io::stdout;
+use ratatui::crossterm::event;
+use ratatui::crossterm::event::DisableMouseCapture;
+use ratatui::crossterm::event::EnableMouseCapture;
+use ratatui::crossterm::event::Event;
+use ratatui::crossterm::event::KeyCode;
+use ratatui::crossterm::event::KeyEventKind;
+use ratatui::crossterm::event::KeyModifiers;
+use ratatui::crossterm::event::MouseButton;
+use ratatui::crossterm::event::MouseEventKind;
+use ratatui::crossterm::execute;
+use rushstr_core::SearchOptions;
+use rushstr_core::Store;
+
+use crate::ux::ui_render_engine::UiRenderEngine;
 
 #[derive(Debug, Clone)]
 pub(crate) struct UiState {
@@ -54,67 +63,71 @@ impl SearchUI {
             terminal.draw(|frame| UiRenderEngine::new(&items, &ui_state, &self.store).render(frame))?;
 
             match event::read()? {
-                Event::Key(key) if key.kind == KeyEventKind::Press => match key.code {
-                    KeyCode::Esc => return Ok(None),
-                    KeyCode::Char('f') if key.modifiers == KeyModifiers::CONTROL => {
-                        // mark as favorite
-                    },
-                    KeyCode::Char('t') if key.modifiers == KeyModifiers::CONTROL => {
-                        ui_state.search_options.search_type = ui_state.search_options.search_type.next()
-                    },
-                    KeyCode::Char('c') if key.modifiers == KeyModifiers::CONTROL => {
-                        if let Some(cmd) = items.get(ui_state.selected) {
-                            let mut clipboard = Clipboard::new()?;
-                            clipboard.set_text(cmd)?;
-                        }
-                        return Ok(None);
-                    },
-                    KeyCode::Up => {
-                        ui_state.selected = ui_state.selected.saturating_sub(1);
-                        if ui_state.selected < ui_state.scroll_offset {
-                            ui_state.scroll_offset = ui_state.selected;
-                        }
-                    },
-                    KeyCode::Down => {
-                        self.move_down(&mut ui_state, terminal.size()?.height, &items)?;
-                    },
-                    KeyCode::Enter => {
-                        if let Some(cmd) = items.get(ui_state.selected) {
-                            return Ok(Some(cmd.to_string()));
-                        }
-                    },
-                    KeyCode::Char(c) => {
-                        if ui_state.search_options.text.len() < 50 {
-                            ui_state.search_options.text.push(c);
-                            ui_state.selected = 0;
-                            ui_state.scroll_offset = 0;
-                        }
-                    },
-                    KeyCode::Backspace => {
-                        ui_state.search_options.text.pop();
-                        ui_state.selected = 0;
-                        ui_state.scroll_offset = 0;
-                    },
-                    _ => {},
-                },
-                Event::Mouse(mouse_event) => match mouse_event.kind {
-                    MouseEventKind::ScrollUp => {
-                        ui_state.selected = ui_state.selected.saturating_sub(1);
-                        if ui_state.selected < ui_state.scroll_offset {
-                            ui_state.scroll_offset = ui_state.selected;
-                        }
-                    },
-                    MouseEventKind::ScrollDown => {
-                        self.move_down(&mut ui_state, terminal.size()?.height, &items)?;
-                    },
-                    MouseEventKind::Down(button) => {
-                        if button == MouseButton::Middle {
+                Event::Key(key) if key.kind == KeyEventKind::Press => {
+                    match key.code {
+                        KeyCode::Esc => return Ok(None),
+                        KeyCode::Char('f') if key.modifiers == KeyModifiers::CONTROL => {
+                            // mark as favorite
+                        },
+                        KeyCode::Char('t') if key.modifiers == KeyModifiers::CONTROL => {
+                            ui_state.search_options.search_type = ui_state.search_options.search_type.next()
+                        },
+                        KeyCode::Char('c') if key.modifiers == KeyModifiers::CONTROL => {
+                            if let Some(cmd) = items.get(ui_state.selected) {
+                                let mut clipboard = Clipboard::new()?;
+                                clipboard.set_text(cmd)?;
+                            }
+                            return Ok(None);
+                        },
+                        KeyCode::Up => {
+                            ui_state.selected = ui_state.selected.saturating_sub(1);
+                            if ui_state.selected < ui_state.scroll_offset {
+                                ui_state.scroll_offset = ui_state.selected;
+                            }
+                        },
+                        KeyCode::Down => {
+                            self.move_down(&mut ui_state, terminal.size()?.height, &items)?;
+                        },
+                        KeyCode::Enter => {
                             if let Some(cmd) = items.get(ui_state.selected) {
                                 return Ok(Some(cmd.to_string()));
                             }
-                        }
-                    },
-                    _ => {},
+                        },
+                        KeyCode::Char(c) => {
+                            if ui_state.search_options.input.len() < 50 {
+                                ui_state.search_options.input.push(c);
+                                ui_state.selected = 0;
+                                ui_state.scroll_offset = 0;
+                            }
+                        },
+                        KeyCode::Backspace => {
+                            ui_state.search_options.input.pop();
+                            ui_state.selected = 0;
+                            ui_state.scroll_offset = 0;
+                        },
+                        _ => {},
+                    }
+                },
+                Event::Mouse(mouse_event) => {
+                    match mouse_event.kind {
+                        MouseEventKind::ScrollUp => {
+                            ui_state.selected = ui_state.selected.saturating_sub(1);
+                            if ui_state.selected < ui_state.scroll_offset {
+                                ui_state.scroll_offset = ui_state.selected;
+                            }
+                        },
+                        MouseEventKind::ScrollDown => {
+                            self.move_down(&mut ui_state, terminal.size()?.height, &items)?;
+                        },
+                        MouseEventKind::Down(button) => {
+                            if button == MouseButton::Middle {
+                                if let Some(cmd) = items.get(ui_state.selected) {
+                                    return Ok(Some(cmd.to_string()));
+                                }
+                            }
+                        },
+                        _ => {},
+                    }
                 },
                 _ => {},
             }

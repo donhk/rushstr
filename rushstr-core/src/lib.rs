@@ -1,15 +1,17 @@
 mod config;
 mod stores;
 mod types;
+mod utils;
 
+#[doc(inline)]
+pub use config::search_options::SearchOptions;
+#[doc(inline)]
+pub use config::search_options::SearchType;
 #[doc(inline)]
 pub use stores::store_trait::StoreTrait;
-
 #[doc(inline)]
 pub use stores::vector_store::VectorStore;
-
 #[doc(inline)]
 pub use types::common_types::Store;
-
 #[doc(inline)]
-pub use config::search_options::{SearchOptions, SearchType};
+pub use utils::strings::prepare_string;

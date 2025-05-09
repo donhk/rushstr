@@ -7,15 +7,15 @@ tab_spaces = 4
 max_width = 120
 
 # Control how function arguments and return types are wrapped
-fn_args_layout = "Tall"
+fn_params_layout = "Tall"
 fn_call_width = 80
 
 # Controls how imports are grouped and ordered
-imports_granularity = "Crate"
+imports_granularity = "Item"
 group_imports = "StdExternalCrate"
 
 # Enforce trailing commas in multi-line lists
-trailing_comma = "Always"
+trailing_comma = "Vertical"
 
 # Control the formatting of match arms
 match_arm_blocks = true

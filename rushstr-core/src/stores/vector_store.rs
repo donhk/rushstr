@@ -1,116 +1,140 @@
+use fuzzy_matcher::FuzzyMatcher;
+use fuzzy_matcher::skim::SkimMatcherV2;
+
 use crate::SearchOptions;
+use crate::SearchType;
+use crate::prepare_string;
 use crate::stores::store_trait::StoreTrait;
 
 pub struct VectorStore {
-    all_items: [&'static str; 103],
+    all_items: Vec<String>,
 }
 
 impl VectorStore {
     pub fn new() -> VectorStore {
-        let all_items = [
-            "sudo echo \"hola\"",
-            "time",
-            "ping localhost",
-            "git status",
-            "git commit -m 'Initial commit'",
-            "git push origin main",
-            "git checkout -b feature/new-ui",
-            "git rebase -i HEAD~3",
-            "git merge develop",
-            "git log --oneline",
-            "ls -la",
-            "ls -lh",
-            "cd ~/projects/rushstr",
-            "cd ..",
-            "pwd",
-            "cargo build",
-            "cargo run",
-            "cargo test --release",
-            "cargo fmt --check",
-            "cargo clippy",
-            "cargo doc --open",
-            "docker ps",
-            "docker-compose up -d",
-            "docker logs -f app_container",
-            "docker exec -it container_id bash",
-            "htop",
-            "top",
-            "kubectl get pods",
-            "kubectl describe pod my-app-pod",
-            "kubectl logs -f my-app-pod",
-            "ssh user@host",
-            "scp ./target/release/rushstr user@host:/usr/local/bin/",
-            "make install",
-            "make build",
-            "make clean",
-            "nvim src/main.rs",
-            "vim Cargo.toml",
-            "nano README.md",
-            "grep -rn 'TODO' ./src",
-            "tail -f /var/log/syslog",
-            "systemctl restart nginx",
-            "curl http://localhost:8080/health",
-            "ping 8.8.8.8",
-            "chmod +x deploy.sh",
-            "rsync -avz ./data user@host:/backups/",
-            "python3 script.py",
-            "node server.js",
-            "npm install",
-            "yarn start",
-            "composer install",
-            "bundle exec jekyll serve",
-            "mvn clean install",
-            "gradle build",
-            "cmake ..",
-            "make -j4",
-            "sudo apt update",
-            "sudo apt upgrade",
-            "brew update",
-            "brew upgrade",
-            "pip install -r requirements.txt",
-            "pipenv install",
-            "poetry install",
-            "java -version",
-            "rustup update",
-            "rustup component add clippy",
-            "rustup component add rustfmt",
-            "rbenv install 2.7.0",
-            "rbenv global 2.7.0",
-            "go run main.go",
-            "go build -o app",
-            "go test ./...",
-            "php artisan serve",
-            "composer dump-autoload",
-            "lsof -i :3000",
-            "netstat -tulnp",
-            "ifconfig",
-            "ip a",
-            "systemctl status docker",
-            "journalctl -u nginx",
-            "sudo reboot",
-            "sudo shutdown -h now",
-            "screen -ls",
-            "tmux new -s session",
-            "tmux attach -t session",
-            "ps aux | grep rust",
-            "kill -9 12345",
-            "alias ll='ls -la'",
-            "history | grep cargo",
-            "date",
-            "cal",
-            "df -h",
-            "du -sh *",
-            "free -m",
-            "top -o %MEM",
-            "curl ifconfig.me",
-            "wget https://example.com/file.zip",
-            "unzip file.zip",
-            "tar -xzvf archive.tar.gz",
-            "scp file.zip user@host:/tmp/",
-            "chown -R user:user /var/www",
-            "ln -s /path/to/target symlink",
-            "find . -name '*.rs'",
-            "cargo install cargo-watch",
+        let all_items = vec![
+            "sudo echo \"hola\"".to_string(),
+            "time".to_string(),
+            "ping localhost".to_string(),
+            "git status".to_string(),
+            "git commit -m 'Initial commit'".to_string(),
+            "git push origin main".to_string(),
+            "git checkout -b feature/new-ui".to_string(),
+            "git rebase -i HEAD~3".to_string(),
+            "git merge develop".to_string(),
+            "git log --oneline".to_string(),
+            "export ORACLE_HOME=/uuid/dev/sg/dbhome_1\nexport PATH=ORACLE_HOME/bin:$PATH\nexport ORACLE_SID=abc"
+                .to_string(),
+            "ls -la".to_string(),
+            "ls -lh".to_string(),
+            "cd ~/projects/rushstr".to_string(),
+            "cd ..".to_string(),
+            "pwd".to_string(),
+            // Example 1: Python virtual environment setup
+            "source ~/venv/bin/activate\nexport PYTHONPATH=~/projects/myapp\nexport DEBUG=true".to_string(),
+            // Example 2: Java environment setup
+            "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64\nexport PATH=$JAVA_HOME/bin:$PATH\nexport APP_ENV=production".to_string(),
+            // Example 3: PostgreSQL database environment
+            "export PGDATA=/var/lib/postgresql/13/main\nexport PATH=/usr/lib/postgresql/13/bin:$PATH\nexport PGDATABASE=mydb".to_string(),
+            // Example 4: Kubernetes CLI context setup
+            "export KUBECONFIG=~/.kube/config-dev\nexport CONTEXT=my-cluster\nkubectl config use-context $CONTEXT".to_string(),
+            "\
+            abc text\
+            this is a large text\
+            abc\
+            \
+            ".to_string(),
+            "cargo build".to_string(),
+            "cargo run".to_string(),
+            "cargo test --release".to_string(),
+            "cargo fmt --check".to_string(),
+            "cargo clippy".to_string(),
+            "cargo doc --open".to_string(),
+            "docker ps".to_string(),
+            "docker-compose up -d".to_string(),
+            "docker logs -f app_container".to_string(),
+            "docker exec -it container_id bash".to_string(),
+            "htop".to_string(),
+            "top".to_string(),
+            "kubectl get pods".to_string(),
+            "kubectl describe pod my-app-pod".to_string(),
+            "kubectl logs -f my-app-pod".to_string(),
+            "ssh user@host".to_string(),
+            "scp ./target/release/rushstr user@host:/usr/local/bin/".to_string(),
+            "make install".to_string(),
+            "make build".to_string(),
+            "make clean".to_string(),
+            "nvim src/main.rs".to_string(),
+            "vim Cargo.toml".to_string(),
+            "nano README.md".to_string(),
+            "grep -rn 'TODO' ./src".to_string(),
+            "tail -f /var/log/syslog".to_string(),
+            "systemctl restart nginx".to_string(),
+            "curl http://localhost:8080/health".to_string(),
+            "ping 8.8.8.8".to_string(),
+            "chmod +x deploy.sh".to_string(),
+            "rsync -avz ./data user@host:/backups/".to_string(),
+            "python3 script.py".to_string(),
+            "node server.js".to_string(),
+            "npm install".to_string(),
+            "yarn start".to_string(),
+            "composer install".to_string(),
+            "bundle exec jekyll serve".to_string(),
+            "mvn clean install".to_string(),
+            "gradle build".to_string(),
+            "cmake ..".to_string(),
+            "make -j4".to_string(),
+            "sudo apt update".to_string(),
+            "sudo apt upgrade".to_string(),
+            "brew update".to_string(),
+            "brew upgrade".to_string(),
+            "pip install -r requirements.txt".to_string(),
+            "pipenv install".to_string(),
+            "poetry install".to_string(),
+            "java -version".to_string(),
+            "rustup update".to_string(),
+            "rustup component add clippy".to_string(),
+            "rustup component add rustfmt".to_string(),
+            "rbenv install 2.7.0".to_string(),
+            "rbenv global 2.7.0".to_string(),
+            "go run main.go".to_string(),
+            "go build -o app".to_string(),
+            "go test ./...".to_string(),
+            "php artisan serve".to_string(),
+            "composer dump-autoload".to_string(),
+            "lsof -i :3000".to_string(),
+            "netstat -tulnp".to_string(),
+            "ifconfig".to_string(),
+            "ip a".to_string(),
+            "systemctl status docker".to_string(),
+            "journalctl -u nginx".to_string(),
+            "sudo reboot".to_string(),
+            "sudo shutdown -h now".to_string(),
+            "screen -ls".to_string(),
+            "tmux new -s session".to_string(),
+            "tmux attach -t session".to_string(),
+            "ps aux | grep rust".to_string(),
+            "kill -9 12345".to_string(),
+            "alias ll='ls -la'".to_string(),
+            "history | grep cargo".to_string(),
+            "date".to_string(),
+            "cal".to_string(),
+            "df -h".to_string(),
+            "du -sh *".to_string(),
+            "free -m".to_string(),
+            "top -o %MEM".to_string(),
+            "curl ifconfig.me".to_string(),
+            "wget https://example.com/file.zip".to_string(),
+            "unzip file.zip".to_string(),
+            "tar -xzvf archive.tar.gz".to_string(),
+            "scp file.zip user@host:/tmp/".to_string(),
+            "chown -R user:user /var/www".to_string(),
+            "ln -s /path/to/target symlink".to_string(),
+            "find . -name '*.rs'".to_string(),
+            "cargo install cargo-watch".to_string(),
+            "export NODE_ENV=development
+export DATABASE_URL=\"postgresql://user:pass@localhost:5432/mydb\"
+export LOG_LEVEL=debug".to_string(),
         ];
         VectorStore { all_items }
     }
@@ -118,30 +142,92 @@ impl VectorStore {
 
 impl StoreTrait for VectorStore {
     fn filter_items(&self, search_options: &SearchOptions) -> Vec<String> {
-        if search_options.text.is_empty() {
-            return self.all_items.iter().take(50).map(|item| item.to_string()).collect();
+        match search_options.search_type {
+            SearchType::MonkeyTyping => filter_items_monkey(&self.all_items, search_options),
+            SearchType::Exact => filter_items_exact(&self.all_items, search_options),
+            SearchType::Regex => filter_items_regex(&self.all_items, search_options),
         }
-
-        let input = if search_options.is_case_insensitive() {
-            search_options.text.to_lowercase()
-        } else {
-            search_options.text.to_string()
-        };
-
-        self.all_items
-            .iter()
-            .filter(|item| {
-                if search_options.is_case_insensitive() {
-                    item.to_lowercase().contains(&input)
-                } else {
-                    item.contains(&input)
-                }
-            })
-            .map(|item| item.to_string())
-            .collect()
     }
 
     fn total(&self) -> usize {
         self.all_items.len()
     }
+}
+
+pub fn filter_items_monkey(history: &[String], search_options: &SearchOptions) -> Vec<String> {
+    let matcher = SkimMatcherV2::default();
+
+    if search_options.input.is_empty() {
+        return history.iter().take(50).map(|item| item.to_string()).collect();
+    }
+
+    let input = if search_options.is_case_insensitive() {
+        prepare_string(&search_options.input).to_lowercase()
+    } else {
+        prepare_string(&search_options.input)
+    };
+
+    let mut matches: Vec<(String, i64)> = history
+        .iter()
+        .filter_map(|item| {
+            let target = if search_options.is_case_insensitive() {
+                item.to_lowercase()
+            } else {
+                item.to_string()
+            };
+            matcher.fuzzy_match(&target, &input).map(|score| (target, score))
+        })
+        .collect();
+
+    // Optional: sort by score descending
+    matches.sort_by(|a, b| b.1.cmp(&a.1));
+
+    matches.into_iter().map(|(item, _score)| item.to_string()).collect()
+}
+
+pub fn filter_items_exact(history: &[String], search_options: &SearchOptions) -> Vec<String> {
+    if search_options.input.is_empty() {
+        return history.iter().take(50).map(|item| item.to_string()).collect();
+    }
+
+    let input = if search_options.is_case_insensitive() {
+        search_options.input.to_lowercase()
+    } else {
+        search_options.input.to_string()
+    };
+
+    history
+        .iter()
+        .filter(|item| {
+            if search_options.is_case_insensitive() {
+                item.to_lowercase().contains(&input)
+            } else {
+                item.contains(&input)
+            }
+        })
+        .map(|item| item.to_string())
+        .collect()
+}
+
+pub fn filter_items_regex(history: &[String], search_options: &SearchOptions) -> Vec<String> {
+    if search_options.input.is_empty() {
+        return history.iter().take(50).map(|item| item.to_string()).collect();
+    }
+
+    let pattern = if search_options.is_case_insensitive() {
+        format!("(?i){}", search_options.input)
+    } else {
+        search_options.input.clone()
+    };
+
+    let re = match regex::Regex::new(&pattern) {
+        Ok(re) => re,
+        Err(_) => return vec![], // return empty if the regex is invalid
+    };
+
+    history
+        .iter()
+        .filter(|item| re.is_match(item))
+        .map(|item| item.to_string())
+        .collect()
 }
