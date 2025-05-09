@@ -1,3 +1,4 @@
+mod config;
 mod stores;
 mod types;
 
@@ -9,3 +10,6 @@ pub use stores::vector_store::VectorStore;
 
 #[doc(inline)]
 pub use types::common_types::Store;
+
+#[doc(inline)]
+pub use config::search_options::{SearchOptions, SearchType};
