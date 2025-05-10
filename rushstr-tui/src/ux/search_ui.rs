@@ -94,14 +94,14 @@ impl SearchUI {
                             }
                         },
                         KeyCode::Char(c) => {
-                            if ui_state.search_options.text.len() < 50 {
-                                ui_state.search_options.text.push(c);
+                            if ui_state.search_options.input.len() < 50 {
+                                ui_state.search_options.input.push(c);
                                 ui_state.selected = 0;
                                 ui_state.scroll_offset = 0;
                             }
                         },
                         KeyCode::Backspace => {
-                            ui_state.search_options.text.pop();
+                            ui_state.search_options.input.pop();
                             ui_state.selected = 0;
                             ui_state.scroll_offset = 0;
                         },

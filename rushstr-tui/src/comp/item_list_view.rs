@@ -40,7 +40,7 @@ impl<'f> ItemListView<'f> {
             .cloned()
             .collect::<Vec<_>>();
 
-        let text = &self.ui_state.search_options.text;
+        let text = &self.ui_state.search_options.input;
         let selected = self.ui_state.selected - self.ui_state.scroll_offset;
         let list_items: Vec<ListItem> = items
             .into_iter()
@@ -117,7 +117,7 @@ pub(crate) fn match_tokens<'a>(item: &str, text: &str) -> Vec<Span<'a>> {
     let styled_flags = token_finder(item, text);
     for (str, red) in styled_flags {
         let span = if red {
-            Span::styled(str, Style::default().fg(Color::Red))
+            Span::styled(str, Style::default().fg(Color::Red).add_modifier(Modifier::BOLD))
         } else {
             Span::raw(str)
         };
