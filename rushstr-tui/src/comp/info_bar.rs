@@ -4,7 +4,7 @@ use ratatui::prelude::{Color, Line, Modifier, Span, Style};
 use ratatui::widgets::Paragraph;
 use rushstr_core::{HLines, Store};
 
-use crate::UiState;
+use crate::{UiState, hindex_to_hlines};
 
 pub struct InfoBar<'f> {
     items: &'f [String],
@@ -79,6 +79,7 @@ impl<'f> InfoBar<'f> {
     }
 
     fn build_debug_info_bar(&self, case: &str, matching: &str, height: HLines) -> Vec<Span> {
+        let h_to_selected = hindex_to_hlines(self.items, self.ui_state.selected);
         let mut parts = self.base_info_base(case, matching);
         let debug = vec![
             Span::raw(" 🐛 height:"),
@@ -87,6 +88,8 @@ impl<'f> InfoBar<'f> {
             Span::styled(format!("{:<3}", self.ui_state.selected), Style::default().fg(Color::Yellow)),
             Span::raw("offset:"),
             Span::styled(format!("{:<3}", self.ui_state.offset), Style::default().fg(Color::Yellow)),
+            Span::raw("h_to_selected:"),
+            Span::styled(format!("{:<3}", h_to_selected), Style::default().fg(Color::Yellow)),
         ];
         parts.extend(debug);
         parts
