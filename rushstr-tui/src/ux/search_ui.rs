@@ -19,8 +19,11 @@ use crate::ux::ui_render_engine::UiRenderEngine;
 
 #[derive(Debug, Clone)]
 pub(crate) struct UiState {
+    /// index within the list of results
     pub selected: usize,
+    /// number of lines to skip
     pub scroll_offset: usize,
+    /// search options
     pub search_options: SearchOptions,
 }
 
@@ -59,7 +62,7 @@ impl SearchUI {
         let mut ui_state = UiState::default();
         loop {
             let items = self.store.filter_items(&ui_state.search_options);
-
+            let height = (terminal.size()?.height - 2) as usize;
             terminal.draw(|frame| UiRenderEngine::new(&items, &ui_state, &self.store).render(frame))?;
 
             match event::read()? {
@@ -74,50 +77,29 @@ impl SearchUI {
                         },
                         KeyCode::Char('c') if key.modifiers == KeyModifiers::CONTROL => {
                             if let Some(cmd) = items.get(ui_state.selected) {
-                                let mut clipboard = Clipboard::new()?;
-                                clipboard.set_text(cmd)?;
+                                Clipboard::new()?.set_text(cmd)?;
                             }
                             return Ok(None);
                         },
-                        KeyCode::Up => {
-                            ui_state.selected = ui_state.selected.saturating_sub(1);
-                            if ui_state.selected < ui_state.scroll_offset {
-                                ui_state.scroll_offset = ui_state.selected;
-                            }
-                        },
+                        KeyCode::Up => key_up(&mut ui_state),
                         KeyCode::Down => {
-                            self.move_down(&mut ui_state, terminal.size()?.height, &items)?;
+                            key_down(&mut ui_state, height, &items)?;
                         },
                         KeyCode::Enter => {
                             if let Some(cmd) = items.get(ui_state.selected) {
                                 return Ok(Some(cmd.to_string()));
                             }
                         },
-                        KeyCode::Char(c) => {
-                            if ui_state.search_options.input.len() < 50 {
-                                ui_state.search_options.input.push(c);
-                                ui_state.selected = 0;
-                                ui_state.scroll_offset = 0;
-                            }
-                        },
-                        KeyCode::Backspace => {
-                            ui_state.search_options.input.pop();
-                            ui_state.selected = 0;
-                            ui_state.scroll_offset = 0;
-                        },
+                        KeyCode::Char(c) => put_char(&mut ui_state, c),
+                        KeyCode::Backspace => backspace(&mut ui_state),
                         _ => {},
                     }
                 },
                 Event::Mouse(mouse_event) => {
                     match mouse_event.kind {
-                        MouseEventKind::ScrollUp => {
-                            ui_state.selected = ui_state.selected.saturating_sub(1);
-                            if ui_state.selected < ui_state.scroll_offset {
-                                ui_state.scroll_offset = ui_state.selected;
-                            }
-                        },
+                        MouseEventKind::ScrollUp => key_up(&mut ui_state),
                         MouseEventKind::ScrollDown => {
-                            self.move_down(&mut ui_state, terminal.size()?.height, &items)?;
+                            key_down(&mut ui_state, height, &items)?;
                         },
                         MouseEventKind::Down(button) => {
                             if button == MouseButton::Middle {
@@ -133,15 +115,35 @@ impl SearchUI {
             }
         }
     }
+}
 
-    fn move_down(&self, search_options: &mut UiState, height: u16, items: &[String]) -> anyhow::Result<()> {
-        if search_options.selected + 1 < items.len() {
-            search_options.selected += 1;
-            let list_height = height as usize - 2;
-            if search_options.selected >= search_options.scroll_offset + list_height {
-                search_options.scroll_offset = search_options.selected + 1 - list_height;
-            }
-        }
-        Ok(())
+fn put_char(ui_state: &mut UiState, char: char) {
+    if ui_state.search_options.input.len() < 50 {
+        ui_state.search_options.input.push(char);
+        ui_state.selected = 0;
+        ui_state.scroll_offset = 0;
     }
+}
+
+fn backspace(ui_state: &mut UiState) {
+    ui_state.search_options.input.pop();
+    ui_state.selected = 0;
+    ui_state.scroll_offset = 0;
+}
+
+fn key_up(ui_state: &mut UiState) {
+    ui_state.selected = ui_state.selected.saturating_sub(1);
+    if ui_state.selected < ui_state.scroll_offset {
+        ui_state.scroll_offset = ui_state.selected;
+    }
+}
+
+fn key_down(ui_state: &mut UiState, list_height: usize, items: &[String]) -> anyhow::Result<()> {
+    if ui_state.selected + 1 < items.len() {
+        ui_state.selected += 1;
+        if ui_state.selected >= ui_state.scroll_offset + list_height {
+            ui_state.scroll_offset = ui_state.selected + 1 - list_height;
+        }
+    }
+    Ok(())
 }
