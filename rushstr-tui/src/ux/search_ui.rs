@@ -116,11 +116,12 @@ fn key_up(ui_state: &mut UiState) {
 }
 
 fn key_down(ui_state: &mut UiState, list_height: usize, items: &[String]) -> anyhow::Result<()> {
-    if ui_state.selected + 1 < items.len() {
-        ui_state.selected += 1;
-        if ui_state.selected >= ui_state.offset + list_height {
-            ui_state.offset = ui_state.selected + 1 - list_height;
-        }
+    if ui_state.selected + 1 >= items.len() {
+        return Ok(());
+    }
+    ui_state.selected += 1;
+    if ui_state.selected >= ui_state.offset + list_height {
+        ui_state.offset = ui_state.selected + 1 - list_height;
     }
     Ok(())
 }
