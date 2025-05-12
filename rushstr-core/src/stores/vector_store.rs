@@ -182,6 +182,7 @@ pub fn filter_items_monkey(history: &[HItem], options: &SearchOptions) -> Vec<HI
     } else {
         prepare_string(&options.input)
     };
+    let reversed_input: String = input.chars().rev().collect();
 
     let mut matches: Vec<(HItem, i64)> = history
         .iter()
@@ -191,27 +192,35 @@ pub fn filter_items_monkey(history: &[HItem], options: &SearchOptions) -> Vec<HI
             } else {
                 item.command()
             };
-            matcher.fuzzy_match(&target, &input).map(|score| (item.clone(), score))
+
+            let forward_score = matcher.fuzzy_match(&target, &input);
+            let backward_score = matcher.fuzzy_match(&target, &reversed_input);
+
+            match (forward_score, backward_score) {
+                (Some(f), Some(b)) => Some((item.clone(), f.max(b))),
+                (Some(f), None) => Some((item.clone(), f)),
+                (None, Some(b)) => Some((item.clone(), b)),
+                (None, None) => None,
+            }
         })
         .collect();
 
-    // Optional: sort by score descending
     matches.sort_by(|a, b| b.1.cmp(&a.1));
 
-    matches.into_iter().map(|(item, _score)| item).collect()
+    matches.into_iter().map(|(item, _)| item).collect()
 }
 
-pub fn filter_items_exact(history: &[HItem], search_options: &SearchOptions) -> Vec<HItem> {
-    let input = if search_options.is_case_insensitive() {
-        search_options.input.to_lowercase()
+pub fn filter_items_exact(history: &[HItem], options: &SearchOptions) -> Vec<HItem> {
+    let input = if options.is_case_insensitive() {
+        options.input.to_lowercase()
     } else {
-        search_options.input.to_string()
+        options.input.to_string()
     };
 
     history
         .iter()
         .filter(|item| {
-            if search_options.is_case_insensitive() {
+            if options.is_case_insensitive() {
                 item.command().to_lowercase().contains(&input)
             } else {
                 item.command().contains(&input)
@@ -221,11 +230,11 @@ pub fn filter_items_exact(history: &[HItem], search_options: &SearchOptions) -> 
         .collect()
 }
 
-pub fn filter_items_regex(history: &[HItem], search_options: &SearchOptions) -> Vec<HItem> {
-    let pattern = if search_options.is_case_insensitive() {
-        format!("(?i){}", search_options.input)
+pub fn filter_items_regex(history: &[HItem], options: &SearchOptions) -> Vec<HItem> {
+    let pattern = if options.is_case_insensitive() {
+        format!("(?i){}", options.input)
     } else {
-        search_options.input.clone()
+        options.input.clone()
     };
 
     let re = match regex::Regex::new(&pattern) {
