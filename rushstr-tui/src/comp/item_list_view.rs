@@ -5,7 +5,7 @@ use ratatui::layout::Rect;
 use ratatui::prelude::{Color, Line, Modifier, Span, Style};
 use ratatui::text::Text;
 use ratatui::widgets::{Block, Borders, List, ListItem};
-use rushstr_core::{HItem, prepare_string};
+use rushstr_core::{HIndex, HItem, prepare_string};
 
 use crate::UiState;
 
@@ -34,12 +34,12 @@ impl<'f> ItemListView<'f> {
             .cloned()
             .collect::<Vec<_>>();
 
-        let text = &self.ui_state.search_options.input;
+        let input = &self.ui_state.search_options.input;
         let selected = self.ui_state.selected - self.ui_state.offset;
         let list_items: Vec<ListItem> = items
             .into_iter()
             .enumerate()
-            .map(|(i, item)| format_item(i, item, text, selected))
+            .map(|(index, item)| format_item(index, item, input, selected))
             .collect();
 
         let list = List::new(list_items).block(Block::default().borders(Borders::NONE));
@@ -48,8 +48,8 @@ impl<'f> ItemListView<'f> {
     }
 }
 
-pub(crate) fn format_item(i: usize, item: HItem, text: &str, selected: usize) -> ListItem {
-    let style = if i == selected {
+pub(crate) fn format_item(index: HIndex, item: HItem, input: &str, selected: HIndex) -> ListItem {
+    let style = if index == selected {
         Style::default()
             .bg(Color::LightYellow)
             .fg(Color::Black)
@@ -61,8 +61,8 @@ pub(crate) fn format_item(i: usize, item: HItem, text: &str, selected: usize) ->
     let mut cmd_lines = Vec::new();
     let in_lines = item.command_lines();
     for line in in_lines {
-        let o_line = if !text.is_empty() {
-            let c_text = prepare_string(text);
+        let o_line = if !input.is_empty() {
+            let c_text = prepare_string(input);
             let spans = match_tokens(&line, &c_text);
             Line::from(spans)
         } else {
@@ -75,9 +75,9 @@ pub(crate) fn format_item(i: usize, item: HItem, text: &str, selected: usize) ->
     ListItem::new(text).style(style)
 }
 
-pub(crate) fn create_tokens(text: &str) -> HashSet<char> {
+pub(crate) fn create_tokens(input: &str) -> HashSet<char> {
     let mut tokens = HashSet::new();
-    for token in text.split_whitespace().filter(|t| !t.is_empty()) {
+    for token in input.split_whitespace().filter(|t| !t.is_empty()) {
         for c in token.chars() {
             tokens.insert(c);
         }
@@ -85,14 +85,14 @@ pub(crate) fn create_tokens(text: &str) -> HashSet<char> {
     tokens
 }
 
-pub(crate) fn token_finder(item: &str, text: &str) -> Vec<(String, bool)> {
-    let tokens = create_tokens(text);
+pub(crate) fn token_finder(item: &str, input: &str) -> Vec<(String, bool)> {
+    let tokens = create_tokens(input);
     let mut result = Vec::new();
     let mut current = String::new();
     let mut current_flag: Option<bool> = None;
 
-    for c in item.chars() {
-        let flag = tokens.contains(&c);
+    for char in item.chars() {
+        let flag = tokens.contains(&char);
         match current_flag {
             Some(f) if f != flag => {
                 result.push((current.clone(), f));
@@ -101,7 +101,7 @@ pub(crate) fn token_finder(item: &str, text: &str) -> Vec<(String, bool)> {
             None => {},
             _ => {},
         }
-        current.push(c);
+        current.push(char);
         current_flag = Some(flag);
     }
 
@@ -112,9 +112,9 @@ pub(crate) fn token_finder(item: &str, text: &str) -> Vec<(String, bool)> {
     result
 }
 
-pub(crate) fn match_tokens<'a>(item: &str, text: &str) -> Vec<Span<'a>> {
+pub(crate) fn match_tokens<'a>(item: &str, input: &str) -> Vec<Span<'a>> {
     let mut spans = Vec::new();
-    let styled_flags = token_finder(item, text);
+    let styled_flags = token_finder(item, input);
     for (str, red) in styled_flags {
         let span = if red {
             Span::styled(str, Style::default().fg(Color::Red).add_modifier(Modifier::BOLD))
