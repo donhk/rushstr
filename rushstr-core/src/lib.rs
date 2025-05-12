@@ -19,7 +19,7 @@ pub use stores::store_trait::StoreTrait;
 #[doc(inline)]
 pub use stores::vector_store::VectorStore;
 #[doc(inline)]
-pub use types::common_types::{HIndex, HLines, Store,Scanner};
+pub use types::common_types::{HIndex, HLines, Scanner, Store};
 #[doc(inline)]
 pub use types::h_item::HItem;
 #[doc(inline)]

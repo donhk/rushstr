@@ -1,6 +1,7 @@
 use std::sync::Arc;
-use crate::crawler::scanner::HScanner;
+
 use crate::StoreTrait;
+use crate::crawler::scanner::HScanner;
 
 pub type Scanner = Arc<dyn HScanner>;
 
