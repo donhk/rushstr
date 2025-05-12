@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 use crate::HLines;
 
 /// Represents a multi-line shell command entry.
@@ -5,6 +7,7 @@ use crate::HLines;
 pub struct HItem {
     /// A list of strings, each representing a line of the command.
     command: Vec<String>,
+    id: Uuid,
 }
 
 impl HItem {
@@ -19,7 +22,10 @@ impl HItem {
     ///
     /// A new instance of `HItem`.
     pub fn new(command: Vec<String>) -> HItem {
-        Self { command }
+        Self {
+            command,
+            id: Uuid::new_v4(),
+        }
     }
 
     /// Returns the number of lines in the command.
@@ -58,5 +64,9 @@ impl HItem {
 
     pub fn command_lines(&self) -> Vec<String> {
         self.command.clone()
+    }
+
+    pub fn id(&self) -> &Uuid {
+        &self.id
     }
 }
