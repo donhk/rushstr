@@ -2,19 +2,19 @@ use ratatui::Frame;
 use ratatui::layout::Rect;
 use ratatui::prelude::{Color, Line, Modifier, Span, Style};
 use ratatui::widgets::Paragraph;
-use rushstr_core::{HLines, Store};
+use rushstr_core::{HItem, HLines, Store};
 
 use crate::{UiState, hindex_to_hlines};
 
 pub struct InfoBar<'f> {
-    items: &'f [String],
+    items: &'f [HItem],
     store: &'f Store,
     ui_state: &'f UiState,
     layout: &'f [Rect],
 }
 
 impl<'f> InfoBar<'f> {
-    pub fn new(items: &'f [String], ui_state: &'f UiState, store: &'f Store, layout: &'f [Rect]) -> Self {
+    pub fn new(items: &'f [HItem], ui_state: &'f UiState, store: &'f Store, layout: &'f [Rect]) -> Self {
         Self {
             items,
             ui_state,

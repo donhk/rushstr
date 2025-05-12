@@ -2,10 +2,10 @@ use fuzzy_matcher::FuzzyMatcher;
 use fuzzy_matcher::skim::SkimMatcherV2;
 
 use crate::stores::store_trait::StoreTrait;
-use crate::{HLines, SearchOptions, SearchType, prepare_string};
+use crate::{HItem, HLines, SearchOptions, SearchType, prepare_string};
 
 pub struct VectorStore {
-    all_items: Vec<String>,
+    all_items: Vec<HItem>,
 }
 
 impl VectorStore {
@@ -144,19 +144,24 @@ impl VectorStore {
 export DATABASE_URL=\"postgresql://user:pass@localhost:5432/mydb\"
 export LOG_LEVEL=debug".to_string(),
         ];
-        VectorStore { all_items }
+        let mut h_items = Vec::new();
+        for item in all_items {
+            let cmds = item.split("\n").map(|m| m.to_string()).collect::<Vec<_>>();
+            h_items.push(HItem::new(cmds))
+        }
+        VectorStore { all_items: h_items }
     }
 }
 
 impl StoreTrait for VectorStore {
-    fn filter_items(&self, search_options: &SearchOptions) -> Vec<String> {
-        if search_options.input.is_empty() {
+    fn items(&self, options: &SearchOptions) -> Vec<HItem> {
+        if options.input.is_empty() {
             return self.all_items.clone();
         }
-        match search_options.search_type {
-            SearchType::MonkeyTyping => filter_items_monkey(&self.all_items, search_options),
-            SearchType::Exact => filter_items_exact(&self.all_items, search_options),
-            SearchType::Regex => filter_items_regex(&self.all_items, search_options),
+        match options.search_type {
+            SearchType::MonkeyTyping => filter_items_monkey(&self.all_items, options),
+            SearchType::Exact => filter_items_exact(&self.all_items, options),
+            SearchType::Regex => filter_items_regex(&self.all_items, options),
         }
     }
 
@@ -169,38 +174,34 @@ impl StoreTrait for VectorStore {
     }
 }
 
-pub fn filter_items_monkey(history: &[String], search_options: &SearchOptions) -> Vec<String> {
+pub fn filter_items_monkey(history: &[HItem], options: &SearchOptions) -> Vec<HItem> {
     let matcher = SkimMatcherV2::default();
 
-    let input = if search_options.is_case_insensitive() {
-        prepare_string(&search_options.input).to_lowercase()
+    let input = if options.is_case_insensitive() {
+        prepare_string(&options.input).to_lowercase()
     } else {
-        prepare_string(&search_options.input)
+        prepare_string(&options.input)
     };
 
-    let mut matches: Vec<(String, i64)> = history
+    let mut matches: Vec<(HItem, i64)> = history
         .iter()
         .filter_map(|item| {
-            let target = if search_options.is_case_insensitive() {
-                item.to_lowercase()
+            let target = if options.is_case_insensitive() {
+                item.command().to_lowercase()
             } else {
-                item.to_string()
+                item.command()
             };
-            matcher.fuzzy_match(&target, &input).map(|score| (target, score))
+            matcher.fuzzy_match(&target, &input).map(|score| (item.clone(), score))
         })
         .collect();
 
     // Optional: sort by score descending
     matches.sort_by(|a, b| b.1.cmp(&a.1));
 
-    matches.into_iter().map(|(item, _score)| item.to_string()).collect()
+    matches.into_iter().map(|(item, _score)| item).collect()
 }
 
-pub fn filter_items_exact(history: &[String], search_options: &SearchOptions) -> Vec<String> {
-    if search_options.input.is_empty() {
-        return history.iter().take(50).map(|item| item.to_string()).collect();
-    }
-
+pub fn filter_items_exact(history: &[HItem], search_options: &SearchOptions) -> Vec<HItem> {
     let input = if search_options.is_case_insensitive() {
         search_options.input.to_lowercase()
     } else {
@@ -211,20 +212,16 @@ pub fn filter_items_exact(history: &[String], search_options: &SearchOptions) ->
         .iter()
         .filter(|item| {
             if search_options.is_case_insensitive() {
-                item.to_lowercase().contains(&input)
+                item.command().to_lowercase().contains(&input)
             } else {
-                item.contains(&input)
+                item.command().contains(&input)
             }
         })
-        .map(|item| item.to_string())
+        .map(|item| item.clone())
         .collect()
 }
 
-pub fn filter_items_regex(history: &[String], search_options: &SearchOptions) -> Vec<String> {
-    if search_options.input.is_empty() {
-        return history.iter().take(50).map(|item| item.to_string()).collect();
-    }
-
+pub fn filter_items_regex(history: &[HItem], search_options: &SearchOptions) -> Vec<HItem> {
     let pattern = if search_options.is_case_insensitive() {
         format!("(?i){}", search_options.input)
     } else {
@@ -238,7 +235,7 @@ pub fn filter_items_regex(history: &[String], search_options: &SearchOptions) ->
 
     history
         .iter()
-        .filter(|item| re.is_match(item))
-        .map(|item| item.to_string())
+        .filter(|item| re.is_match(&item.command()))
+        .map(|item| item.clone())
         .collect()
 }

@@ -1,7 +1,7 @@
-use crate::{HLines, SearchOptions};
+use crate::{HItem, HLines, SearchOptions};
 
 pub trait StoreTrait {
-    fn filter_items(&self, search_options: &SearchOptions) -> Vec<String>;
+    fn items(&self, options: &SearchOptions) -> Vec<HItem>;
 
     fn total(&self) -> HLines;
 

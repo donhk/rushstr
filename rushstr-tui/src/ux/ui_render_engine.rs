@@ -1,6 +1,6 @@
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout};
-use rushstr_core::Store;
+use rushstr_core::{HItem, Store};
 
 use crate::UiState;
 use crate::comp::info_bar::InfoBar;
@@ -8,13 +8,13 @@ use crate::comp::item_list_view::ItemListView;
 use crate::comp::search_box::SearchBox;
 
 pub struct UiRenderEngine<'f> {
-    items: &'f [String],
+    items: &'f [HItem],
     store: &'f Store,
     search_options: &'f UiState,
 }
 
 impl<'f> UiRenderEngine<'f> {
-    pub fn new(items: &'f [String], search_options: &'f UiState, store: &'f Store) -> Self {
+    pub fn new(items: &'f [HItem], search_options: &'f UiState, store: &'f Store) -> Self {
         Self {
             items,
             search_options,

@@ -14,4 +14,6 @@ pub use stores::vector_store::VectorStore;
 #[doc(inline)]
 pub use types::common_types::{HIndex, HLines, Store};
 #[doc(inline)]
+pub use types::h_item::HItem;
+#[doc(inline)]
 pub use utils::strings::prepare_string;
