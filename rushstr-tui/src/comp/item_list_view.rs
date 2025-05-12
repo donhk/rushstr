@@ -5,18 +5,18 @@ use ratatui::layout::Rect;
 use ratatui::prelude::{Color, Line, Modifier, Span, Style};
 use ratatui::text::Text;
 use ratatui::widgets::{Block, Borders, List, ListItem};
-use rushstr_core::prepare_string;
+use rushstr_core::{HItem, prepare_string};
 
 use crate::UiState;
 
 pub struct ItemListView<'f> {
-    items: &'f [String],
+    items: &'f [HItem],
     ui_state: &'f UiState,
     layout: &'f [Rect],
 }
 
 impl<'f> ItemListView<'f> {
-    pub fn new(items: &'f [String], ui_state: &'f UiState, layout: &'f [Rect]) -> Self {
+    pub fn new(items: &'f [HItem], ui_state: &'f UiState, layout: &'f [Rect]) -> Self {
         Self {
             items,
             ui_state,
@@ -48,7 +48,7 @@ impl<'f> ItemListView<'f> {
     }
 }
 
-pub(crate) fn format_item(i: usize, item: String, text: &str, selected: usize) -> ListItem {
+pub(crate) fn format_item(i: usize, item: HItem, text: &str, selected: usize) -> ListItem {
     let style = if i == selected {
         Style::default()
             .bg(Color::LightYellow)
@@ -59,7 +59,7 @@ pub(crate) fn format_item(i: usize, item: String, text: &str, selected: usize) -
     };
 
     let mut cmd_lines = Vec::new();
-    let in_lines = item.split("\n").map(|s| s.to_string()).collect::<Vec<_>>();
+    let in_lines = item.command_lines();
     for line in in_lines {
         let o_line = if !text.is_empty() {
             let c_text = prepare_string(text);

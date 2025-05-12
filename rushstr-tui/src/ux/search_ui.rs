@@ -6,7 +6,7 @@ use ratatui::crossterm::event::{
     DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
 };
 use ratatui::crossterm::{event, execute};
-use rushstr_core::Store;
+use rushstr_core::{HItem, Store};
 
 use crate::UiState;
 use crate::ux::ui_render_engine::UiRenderEngine;
@@ -35,7 +35,7 @@ impl SearchUI {
     fn search_items(&self, terminal: &mut DefaultTerminal) -> anyhow::Result<Option<String>> {
         let mut ui_state = UiState::default();
         loop {
-            let items = self.store.filter_items(&ui_state.search_options);
+            let items = self.store.items(&ui_state.search_options);
             let height = (terminal.size()?.height - 2) as usize;
             terminal.draw(|frame| UiRenderEngine::new(&items, &ui_state, &self.store).render(frame))?;
 
@@ -54,7 +54,7 @@ impl SearchUI {
                         },
                         KeyCode::Char('c') if key.modifiers == KeyModifiers::CONTROL => {
                             if let Some(cmd) = items.get(ui_state.selected) {
-                                Clipboard::new()?.set_text(cmd)?;
+                                Clipboard::new()?.set_text(cmd.raw_text())?;
                             }
                             return Ok(None);
                         },
@@ -64,7 +64,7 @@ impl SearchUI {
                         },
                         KeyCode::Enter => {
                             if let Some(cmd) = items.get(ui_state.selected) {
-                                return Ok(Some(cmd.to_string()));
+                                return Ok(Some(cmd.raw_text()));
                             }
                         },
                         KeyCode::Char(c) => put_char(&mut ui_state, c),
@@ -81,7 +81,7 @@ impl SearchUI {
                         MouseEventKind::Down(button) => {
                             if button == MouseButton::Middle {
                                 if let Some(cmd) = items.get(ui_state.selected) {
-                                    return Ok(Some(cmd.to_string()));
+                                    return Ok(Some(cmd.raw_text()));
                                 }
                             }
                         },
@@ -115,7 +115,7 @@ fn key_up(ui_state: &mut UiState) {
     }
 }
 
-fn key_down(ui_state: &mut UiState, list_height: usize, items: &[String]) -> anyhow::Result<()> {
+fn key_down(ui_state: &mut UiState, list_height: usize, items: &[HItem]) -> anyhow::Result<()> {
     if ui_state.selected + 1 >= items.len() {
         return Ok(());
     }
