@@ -25,7 +25,9 @@ impl SearchType {
 
 #[derive(Debug, Clone)]
 pub struct SearchOptions {
+    /// pattern to search in history
     pub input: String,
+    /// type of pattern matching
     pub search_type: SearchType,
 }
 

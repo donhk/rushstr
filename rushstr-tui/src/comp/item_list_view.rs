@@ -2,18 +2,12 @@ use std::collections::HashSet;
 
 use ratatui::Frame;
 use ratatui::layout::Rect;
-use ratatui::prelude::Color;
-use ratatui::prelude::Line;
-use ratatui::prelude::Modifier;
-use ratatui::prelude::Span;
-use ratatui::prelude::Style;
-use ratatui::widgets::Block;
-use ratatui::widgets::Borders;
-use ratatui::widgets::List;
-use ratatui::widgets::ListItem;
+use ratatui::prelude::{Color, Line, Modifier, Span, Style};
+use ratatui::text::Text;
+use ratatui::widgets::{Block, Borders, List, ListItem};
 use rushstr_core::prepare_string;
 
-use crate::ux::search_ui::UiState;
+use crate::UiState;
 
 pub struct ItemListView<'f> {
     items: &'f [String],
@@ -35,13 +29,13 @@ impl<'f> ItemListView<'f> {
         let items = self
             .items
             .iter()
-            .skip(self.ui_state.scroll_offset)
+            .skip(self.ui_state.offset)
             .take(height)
             .cloned()
             .collect::<Vec<_>>();
 
         let text = &self.ui_state.search_options.input;
-        let selected = self.ui_state.selected - self.ui_state.scroll_offset;
+        let selected = self.ui_state.selected - self.ui_state.offset;
         let list_items: Vec<ListItem> = items
             .into_iter()
             .enumerate()
@@ -64,15 +58,21 @@ pub(crate) fn format_item(i: usize, item: String, text: &str, selected: usize) -
         Style::default()
     };
 
-    let line = if !text.is_empty() {
-        let c_text = prepare_string(text);
-        let spans = match_tokens(&item, &c_text);
-        Line::from(spans)
-    } else {
-        Line::raw(item)
-    };
+    let mut cmd_lines = Vec::new();
+    let in_lines = item.split("\n").map(|s| s.to_string()).collect::<Vec<_>>();
+    for line in in_lines {
+        let o_line = if !text.is_empty() {
+            let c_text = prepare_string(text);
+            let spans = match_tokens(&line, &c_text);
+            Line::from(spans)
+        } else {
+            Line::raw(line)
+        };
+        cmd_lines.push(o_line)
+    }
+    let text = Text::from(cmd_lines);
 
-    ListItem::new(line).style(style)
+    ListItem::new(text).style(style)
 }
 
 pub(crate) fn create_tokens(text: &str) -> HashSet<char> {

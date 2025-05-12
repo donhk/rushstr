@@ -1,10 +1,8 @@
 use fuzzy_matcher::FuzzyMatcher;
 use fuzzy_matcher::skim::SkimMatcherV2;
 
-use crate::SearchOptions;
-use crate::SearchType;
-use crate::prepare_string;
 use crate::stores::store_trait::StoreTrait;
+use crate::{HLines, SearchOptions, SearchType, prepare_string};
 
 pub struct VectorStore {
     all_items: Vec<String>,
@@ -16,6 +14,8 @@ impl VectorStore {
             "sudo echo \"hola\"".to_string(),
             "time".to_string(),
             "ping localhost".to_string(),
+            "export ORACLE_HOME=/uuid/dev/sg/dbhome_1\nexport PATH=ORACLE_HOME/bin:$PATH\nexport ORACLE_SID=abc"
+                .to_string(),
             "git status".to_string(),
             "git commit -m 'Initial commit'".to_string(),
             "git push origin main".to_string(),
@@ -23,20 +23,12 @@ impl VectorStore {
             "git rebase -i HEAD~3".to_string(),
             "git merge develop".to_string(),
             "git log --oneline".to_string(),
-            "export ORACLE_HOME=/uuid/dev/sg/dbhome_1\nexport PATH=ORACLE_HOME/bin:$PATH\nexport ORACLE_SID=abc"
-                .to_string(),
             "ls -la".to_string(),
             "ls -lh".to_string(),
             "cd ~/projects/rushstr".to_string(),
             "cd ..".to_string(),
             "pwd".to_string(),
-            // Example 1: Python virtual environment setup
             "source ~/venv/bin/activate\nexport PYTHONPATH=~/projects/myapp\nexport DEBUG=true".to_string(),
-            // Example 2: Java environment setup
-            "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64\nexport PATH=$JAVA_HOME/bin:$PATH\nexport APP_ENV=production".to_string(),
-            // Example 3: PostgreSQL database environment
-            "export PGDATA=/var/lib/postgresql/13/main\nexport PATH=/usr/lib/postgresql/13/bin:$PATH\nexport PGDATABASE=mydb".to_string(),
-            // Example 4: Kubernetes CLI context setup
             "export KUBECONFIG=~/.kube/config-dev\nexport CONTEXT=my-cluster\nkubectl config use-context $CONTEXT".to_string(),
             "\
             abc text\
@@ -49,6 +41,12 @@ impl VectorStore {
             "cargo test --release".to_string(),
             "cargo fmt --check".to_string(),
             "cargo clippy".to_string(),
+            "docker run -p 8080:80 -v $(pwd):/app \nnginx:latest".to_string(),
+            "find . -type f -name \"*.rs\" | \nxargs grep \"fn main\"".to_string(),
+            "git log --pretty=format:\"%h - %an, %ar : %s\" \n          --graph \n      --since=2.weeks".to_string(),
+            "cat /var/log/syslog | \ngrep ERROR | \ntail -n 100".to_string(),
+            "ssh user@hostname \n\"cd /var/www && \n   ls -la && \n    tail -f error.log\"".to_string(),
+            "awk 'BEGIN {sum=0} \n      {sum+=$1} \nEND {print sum}' data.txt".to_string(),
             "cargo doc --open".to_string(),
             "docker ps".to_string(),
             "docker-compose up -d".to_string(),
@@ -57,6 +55,8 @@ impl VectorStore {
             "htop".to_string(),
             "top".to_string(),
             "kubectl get pods".to_string(),
+            // Example 3: PostgreSQL database environment
+            "export PGDATA=/var/lib/postgresql/13/main\nexport PATH=/usr/lib/postgresql/13/bin:$PATH\nexport PGDATABASE=mydb".to_string(),
             "kubectl describe pod my-app-pod".to_string(),
             "kubectl logs -f my-app-pod".to_string(),
             "ssh user@host".to_string(),
@@ -77,6 +77,8 @@ impl VectorStore {
             "python3 script.py".to_string(),
             "node server.js".to_string(),
             "npm install".to_string(),
+            // Example 2: Java environment setup
+            "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64\nexport PATH=$JAVA_HOME/bin:$PATH\nexport APP_ENV=production".to_string(),
             "yarn start".to_string(),
             "composer install".to_string(),
             "bundle exec jekyll serve".to_string(),
@@ -92,17 +94,21 @@ impl VectorStore {
             "pipenv install".to_string(),
             "poetry install".to_string(),
             "java -version".to_string(),
+            "SELECT * FROM users\nWHERE age > 18\nORDER BY last_name".to_string(),
             "rustup update".to_string(),
             "rustup component add clippy".to_string(),
             "rustup component add rustfmt".to_string(),
             "rbenv install 2.7.0".to_string(),
             "rbenv global 2.7.0".to_string(),
             "go run main.go".to_string(),
+            "while true; do\n  echo \"still running...\"\n  sleep 1\ndone".to_string(),
             "go build -o app".to_string(),
             "go test ./...".to_string(),
+            "curl -X POST \n-H \"Content-Type: application/json\" \n-d '{\"key\": \"value\"}' \nhttps://api.example.com/endpoint".to_string(),
             "php artisan serve".to_string(),
             "composer dump-autoload".to_string(),
             "lsof -i :3000".to_string(),
+            "ffmpeg -i input.mp4 \n-c:v libx264 -crf 23 \n-c:a aac -b:a 128k \noutput.mp4".to_string(),
             "netstat -tulnp".to_string(),
             "ifconfig".to_string(),
             "ip a".to_string(),
@@ -111,6 +117,7 @@ impl VectorStore {
             "sudo reboot".to_string(),
             "sudo shutdown -h now".to_string(),
             "screen -ls".to_string(),
+            "python -c \"import sys; \nprint(sys.version); \nprint('Hello, world!')\"".to_string(),
             "tmux new -s session".to_string(),
             "tmux attach -t session".to_string(),
             "ps aux | grep rust".to_string(),
@@ -131,6 +138,7 @@ impl VectorStore {
             "chown -R user:user /var/www".to_string(),
             "ln -s /path/to/target symlink".to_string(),
             "find . -name '*.rs'".to_string(),
+            "for i in {1..10}; do\n  echo \"Processing item $i\"\n  sleep 0.5\ndone".to_string(),
             "cargo install cargo-watch".to_string(),
             "export NODE_ENV=development
 export DATABASE_URL=\"postgresql://user:pass@localhost:5432/mydb\"
@@ -142,6 +150,9 @@ export LOG_LEVEL=debug".to_string(),
 
 impl StoreTrait for VectorStore {
     fn filter_items(&self, search_options: &SearchOptions) -> Vec<String> {
+        if search_options.input.is_empty() {
+            return self.all_items.clone();
+        }
         match search_options.search_type {
             SearchType::MonkeyTyping => filter_items_monkey(&self.all_items, search_options),
             SearchType::Exact => filter_items_exact(&self.all_items, search_options),
@@ -149,17 +160,17 @@ impl StoreTrait for VectorStore {
         }
     }
 
-    fn total(&self) -> usize {
+    fn total(&self) -> HLines {
         self.all_items.len()
+    }
+
+    fn favorites(&self) -> usize {
+        6
     }
 }
 
 pub fn filter_items_monkey(history: &[String], search_options: &SearchOptions) -> Vec<String> {
     let matcher = SkimMatcherV2::default();
-
-    if search_options.input.is_empty() {
-        return history.iter().take(50).map(|item| item.to_string()).collect();
-    }
 
     let input = if search_options.is_case_insensitive() {
         prepare_string(&search_options.input).to_lowercase()

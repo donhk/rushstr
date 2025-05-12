@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use rushstr_core::Store;
-use rushstr_core::VectorStore;
+use rushstr_core::{Store, VectorStore};
 use rushstr_tui::SearchUI;
 
 fn main() -> Result<()> {
