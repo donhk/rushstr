@@ -7,6 +7,7 @@ use ratatui::prelude::Line;
 use ratatui::prelude::Modifier;
 use ratatui::prelude::Span;
 use ratatui::prelude::Style;
+use ratatui::text::Text;
 use ratatui::widgets::Block;
 use ratatui::widgets::Borders;
 use ratatui::widgets::List;
@@ -64,15 +65,21 @@ pub(crate) fn format_item(i: usize, item: String, text: &str, selected: usize) -
         Style::default()
     };
 
-    let line = if !text.is_empty() {
-        let c_text = prepare_string(text);
-        let spans = match_tokens(&item, &c_text);
-        Line::from(spans)
-    } else {
-        Line::raw(item)
-    };
+    let mut cmd_lines = Vec::new();
+    let in_lines = item.split("\n").map(|s| s.to_string()).collect::<Vec<_>>();
+    for line in in_lines {
+        let o_line = if !text.is_empty() {
+            let c_text = prepare_string(text);
+            let spans = match_tokens(&line, &c_text);
+            Line::from(spans)
+        } else {
+            Line::raw(line)
+        };
+        cmd_lines.push(o_line)
+    }
+    let text = Text::from(cmd_lines);
 
-    ListItem::new(line).style(style)
+    ListItem::new(text).style(style)
 }
 
 pub(crate) fn create_tokens(text: &str) -> HashSet<char> {
