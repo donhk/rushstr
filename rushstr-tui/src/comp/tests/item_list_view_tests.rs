@@ -1,6 +1,4 @@
-use crate::comp::item_list_view::create_tokens;
-use crate::comp::item_list_view::match_tokens;
-use crate::comp::item_list_view::token_finder;
+use crate::comp::item_list_view::{create_tokens, match_tokens, token_finder};
 
 #[test]
 pub fn test_create_tokens1() {

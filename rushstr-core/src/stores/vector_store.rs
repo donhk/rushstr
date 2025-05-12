@@ -1,10 +1,8 @@
 use fuzzy_matcher::FuzzyMatcher;
 use fuzzy_matcher::skim::SkimMatcherV2;
 
-use crate::SearchOptions;
-use crate::SearchType;
-use crate::prepare_string;
 use crate::stores::store_trait::StoreTrait;
+use crate::{HLines, SearchOptions, SearchType, prepare_string};
 
 pub struct VectorStore {
     all_items: Vec<String>,
@@ -152,6 +150,9 @@ export LOG_LEVEL=debug".to_string(),
 
 impl StoreTrait for VectorStore {
     fn filter_items(&self, search_options: &SearchOptions) -> Vec<String> {
+        if search_options.input.is_empty() {
+            return self.all_items.clone();
+        }
         match search_options.search_type {
             SearchType::MonkeyTyping => filter_items_monkey(&self.all_items, search_options),
             SearchType::Exact => filter_items_exact(&self.all_items, search_options),
@@ -159,17 +160,17 @@ impl StoreTrait for VectorStore {
         }
     }
 
-    fn total(&self) -> usize {
+    fn total(&self) -> HLines {
         self.all_items.len()
+    }
+
+    fn favorites(&self) -> usize {
+        6
     }
 }
 
 pub fn filter_items_monkey(history: &[String], search_options: &SearchOptions) -> Vec<String> {
     let matcher = SkimMatcherV2::default();
-
-    if search_options.input.is_empty() {
-        return history.iter().take(50).map(|item| item.to_string()).collect();
-    }
 
     let input = if search_options.is_case_insensitive() {
         prepare_string(&search_options.input).to_lowercase()

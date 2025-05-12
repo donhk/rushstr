@@ -1,13 +1,11 @@
 use ratatui::Frame;
-use ratatui::layout::Constraint;
-use ratatui::layout::Direction;
-use ratatui::layout::Layout;
+use ratatui::layout::{Constraint, Direction, Layout};
 use rushstr_core::Store;
 
+use crate::UiState;
 use crate::comp::info_bar::InfoBar;
 use crate::comp::item_list_view::ItemListView;
 use crate::comp::search_box::SearchBox;
-use crate::ux::search_ui::UiState;
 
 pub struct UiRenderEngine<'f> {
     items: &'f [String],

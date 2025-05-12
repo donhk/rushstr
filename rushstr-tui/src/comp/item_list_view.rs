@@ -2,19 +2,12 @@ use std::collections::HashSet;
 
 use ratatui::Frame;
 use ratatui::layout::Rect;
-use ratatui::prelude::Color;
-use ratatui::prelude::Line;
-use ratatui::prelude::Modifier;
-use ratatui::prelude::Span;
-use ratatui::prelude::Style;
+use ratatui::prelude::{Color, Line, Modifier, Span, Style};
 use ratatui::text::Text;
-use ratatui::widgets::Block;
-use ratatui::widgets::Borders;
-use ratatui::widgets::List;
-use ratatui::widgets::ListItem;
+use ratatui::widgets::{Block, Borders, List, ListItem};
 use rushstr_core::prepare_string;
 
-use crate::ux::search_ui::UiState;
+use crate::UiState;
 
 pub struct ItemListView<'f> {
     items: &'f [String],
@@ -36,13 +29,13 @@ impl<'f> ItemListView<'f> {
         let items = self
             .items
             .iter()
-            .skip(self.ui_state.scroll_offset)
+            .skip(self.ui_state.offset)
             .take(height)
             .cloned()
             .collect::<Vec<_>>();
 
         let text = &self.ui_state.search_options.input;
-        let selected = self.ui_state.selected - self.ui_state.scroll_offset;
+        let selected = self.ui_state.selected - self.ui_state.offset;
         let list_items: Vec<ListItem> = items
             .into_iter()
             .enumerate()

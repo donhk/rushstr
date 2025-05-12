@@ -2,40 +2,14 @@ use std::io::stdout;
 
 use arboard::Clipboard;
 use ratatui::DefaultTerminal;
-use ratatui::crossterm::event;
-use ratatui::crossterm::event::DisableMouseCapture;
-use ratatui::crossterm::event::EnableMouseCapture;
-use ratatui::crossterm::event::Event;
-use ratatui::crossterm::event::KeyCode;
-use ratatui::crossterm::event::KeyEventKind;
-use ratatui::crossterm::event::KeyModifiers;
-use ratatui::crossterm::event::MouseButton;
-use ratatui::crossterm::event::MouseEventKind;
-use ratatui::crossterm::execute;
-use rushstr_core::SearchOptions;
+use ratatui::crossterm::event::{
+    DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
+};
+use ratatui::crossterm::{event, execute};
 use rushstr_core::Store;
 
+use crate::UiState;
 use crate::ux::ui_render_engine::UiRenderEngine;
-
-#[derive(Debug, Clone)]
-pub(crate) struct UiState {
-    /// index within the list of results
-    pub selected: usize,
-    /// number of lines to skip
-    pub scroll_offset: usize,
-    /// search options
-    pub search_options: SearchOptions,
-}
-
-impl Default for UiState {
-    fn default() -> Self {
-        UiState {
-            selected: 0,
-            scroll_offset: 0,
-            search_options: SearchOptions::default(),
-        }
-    }
-}
 
 pub struct SearchUI {
     store: Store,
@@ -71,6 +45,9 @@ impl SearchUI {
                         KeyCode::Esc => return Ok(None),
                         KeyCode::Char('f') if key.modifiers == KeyModifiers::CONTROL => {
                             // mark as favorite
+                        },
+                        KeyCode::Char('d') if key.modifiers == KeyModifiers::CONTROL => {
+                            ui_state.debug = !ui_state.debug
                         },
                         KeyCode::Char('t') if key.modifiers == KeyModifiers::CONTROL => {
                             ui_state.search_options.search_type = ui_state.search_options.search_type.next()
@@ -121,28 +98,28 @@ fn put_char(ui_state: &mut UiState, char: char) {
     if ui_state.search_options.input.len() < 50 {
         ui_state.search_options.input.push(char);
         ui_state.selected = 0;
-        ui_state.scroll_offset = 0;
+        ui_state.offset = 0;
     }
 }
 
 fn backspace(ui_state: &mut UiState) {
     ui_state.search_options.input.pop();
     ui_state.selected = 0;
-    ui_state.scroll_offset = 0;
+    ui_state.offset = 0;
 }
 
 fn key_up(ui_state: &mut UiState) {
     ui_state.selected = ui_state.selected.saturating_sub(1);
-    if ui_state.selected < ui_state.scroll_offset {
-        ui_state.scroll_offset = ui_state.selected;
+    if ui_state.selected < ui_state.offset {
+        ui_state.offset = ui_state.selected;
     }
 }
 
 fn key_down(ui_state: &mut UiState, list_height: usize, items: &[String]) -> anyhow::Result<()> {
     if ui_state.selected + 1 < items.len() {
         ui_state.selected += 1;
-        if ui_state.selected >= ui_state.scroll_offset + list_height {
-            ui_state.scroll_offset = ui_state.selected + 1 - list_height;
+        if ui_state.selected >= ui_state.offset + list_height {
+            ui_state.offset = ui_state.selected + 1 - list_height;
         }
     }
     Ok(())

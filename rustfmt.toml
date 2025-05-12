@@ -11,7 +11,7 @@ fn_params_layout = "Tall"
 fn_call_width = 80
 
 # Controls how imports are grouped and ordered
-imports_granularity = "Item"
+imports_granularity = "Module"
 group_imports = "StdExternalCrate"
 
 # Enforce trailing commas in multi-line lists
