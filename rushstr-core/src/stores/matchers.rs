@@ -1,6 +1,7 @@
 use fuzzy_matcher::FuzzyMatcher;
 use fuzzy_matcher::skim::SkimMatcherV2;
-use crate::{prepare_string, HItem, SearchOptions};
+
+use crate::{HItem, SearchOptions, prepare_string};
 
 pub fn filter_items_monkey(history: &[HItem], options: &SearchOptions) -> Vec<HItem> {
     let matcher = SkimMatcherV2::default();
