@@ -79,7 +79,15 @@ impl HItem {
         self.favorite
     }
 
+    pub fn flip_fav(&mut self) {
+        self.favorite = !self.favorite;
+    }
+
     pub fn inc_hits(&mut self) {
         self.hits += 1
+    }
+
+    pub fn hits(&self) -> u64 {
+        self.hits
     }
 }

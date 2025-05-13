@@ -43,8 +43,13 @@ impl SearchUI {
                 Event::Key(key) if key.kind == KeyEventKind::Press => {
                     match key.code {
                         KeyCode::Esc => return Ok(None),
+                        KeyCode::Char('x') if key.modifiers == KeyModifiers::CONTROL => {
+                            if let Some(item) = items.get(ui_state.selected) {
+                                self.store.mark_favorite(item.id());
+                            }
+                        },
                         KeyCode::Char('f') if key.modifiers == KeyModifiers::CONTROL => {
-                            // mark as favorite
+                            ui_state.search_options.favorites = !ui_state.search_options.favorites;
                         },
                         KeyCode::Char('d') if key.modifiers == KeyModifiers::CONTROL => {
                             ui_state.debug = !ui_state.debug
