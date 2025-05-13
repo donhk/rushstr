@@ -35,7 +35,7 @@ impl SearchUI {
     fn search_items(&self, terminal: &mut DefaultTerminal) -> anyhow::Result<Option<String>> {
         let mut ui_state = UiState::default();
         loop {
-            let items = self.store.items(&ui_state.search_options);
+            let items = self.store.items(&ui_state.search_options).ok().unwrap_or(vec![]);
             let height = (terminal.size()?.height - 2) as usize;
             terminal.draw(|frame| UiRenderEngine::new(&items, &ui_state, &self.store).render(frame))?;
 

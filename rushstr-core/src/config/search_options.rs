@@ -29,6 +29,7 @@ pub struct SearchOptions {
     pub input: String,
     /// type of pattern matching
     pub search_type: SearchType,
+    pub favorites: bool,
 }
 
 impl Default for SearchOptions {
@@ -36,6 +37,7 @@ impl Default for SearchOptions {
         SearchOptions {
             input: "".to_string(),
             search_type: SearchType::MonkeyTyping,
+            favorites: false,
         }
     }
 }

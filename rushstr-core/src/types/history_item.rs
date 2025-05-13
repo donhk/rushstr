@@ -1,13 +1,15 @@
-use uuid::Uuid;
+use serde::{Deserialize, Serialize};
 
-use crate::HLines;
+use crate::{HLines, hash_string};
 
 /// Represents a multi-line shell command entry.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct HItem {
     /// A list of strings, each representing a line of the command.
     command: Vec<String>,
-    id: Uuid,
+    id: String,
+    favorite: bool,
+    hits: u64,
 }
 
 impl HItem {
@@ -22,9 +24,12 @@ impl HItem {
     ///
     /// A new instance of `HItem`.
     pub fn new(command: Vec<String>) -> HItem {
+        let id = hash_string(&*command.join("\n"));
         Self {
             command,
-            id: Uuid::new_v4(),
+            id,
+            favorite: false,
+            hits: 0,
         }
     }
 
@@ -48,7 +53,7 @@ impl HItem {
     pub fn command(&self) -> String {
         self.command
             .iter()
-            .map(|m| m.replace("\\s+", "\\s"))
+            .map(|line| line.split_whitespace().collect::<Vec<_>>().join(" "))
             .collect::<Vec<_>>()
             .join(" ")
     }
@@ -66,7 +71,15 @@ impl HItem {
         self.command.clone()
     }
 
-    pub fn id(&self) -> &Uuid {
+    pub fn id(&self) -> &str {
         &self.id
+    }
+
+    pub fn is_fav(&self) -> bool {
+        self.favorite
+    }
+
+    pub fn inc_hits(&mut self) {
+        self.hits += 1
     }
 }
