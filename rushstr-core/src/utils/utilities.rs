@@ -85,13 +85,20 @@ pub fn read_history(shell: Shell) -> Vec<String> {
 
             // Start a new command
             if let Some(cmd) = line.splitn(2, ';').nth(1) {
-                current_command.push_str(cmd);
+                let trimmed = cmd.trim_end_matches('\\');
+                current_command.push_str(trimmed);
                 in_multiline = cmd.trim_end().ends_with('\\');
+                if in_multiline {
+                    current_command.push('\n');
+                }
             }
         } else if in_multiline {
-            current_command.push('\n');
-            current_command.push_str(line);
+            let trimmed = line.trim_end_matches('\\');
+            current_command.push_str(trimmed);
             in_multiline = line.trim_end().ends_with('\\');
+            if in_multiline {
+                current_command.push('\n');
+            }
         } else {
             // Bash or Csh
             commands.push(line.to_string());
@@ -105,12 +112,9 @@ pub fn read_history(shell: Shell) -> Vec<String> {
     commands
 }
 
-/// Removes escaping (like double backslashes) and trailing multiline `\`s.
+/// Removes escaping (like double backslashes).
 fn unescape_zsh(command: &str) -> String {
-    command
-        .replace("\\\\", "\\") // unescape literal backslashes
-        .trim_end_matches('\\') // trim trailing multiline backslash
-        .to_string()
+    command.replace("\\\\", "\\")
 }
 
 /// Computes the SHA-256 hash of the given string and returns it as a lowercase

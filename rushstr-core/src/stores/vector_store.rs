@@ -5,6 +5,7 @@ use crate::{HItem, HLines, Scanner, SearchOptions, SearchType, StoreTrait, creat
 
 pub struct VectorStore {
     database: Db,
+    items: Vec<HItem>,
 }
 
 impl VectorStore {
@@ -19,7 +20,19 @@ impl VectorStore {
                 database.insert(item.id().as_bytes(), bytes)?;
             }
         }
-        Ok(VectorStore { database })
+        let items = Self::convert_to_mem(&database)?;
+        Ok(VectorStore { database, items })
+    }
+
+    fn convert_to_mem(database: &Db) -> anyhow::Result<Vec<HItem>> {
+        let mut all_data = Vec::new();
+        for result in database.iter() {
+            let (_key, value): (IVec, IVec) = result?;
+            let item: HItem = bincode::deserialize(&value)?;
+            all_data.push(item);
+        }
+        all_data.sort_by(|a, b| a.id().cmp(b.id()));
+        Ok(all_data)
     }
 }
 
@@ -27,18 +40,24 @@ impl StoreTrait for VectorStore {
     fn items(&self, options: &SearchOptions) -> anyhow::Result<Vec<HItem>> {
         if options.input.is_empty() {
             let mut all_data = Vec::new();
-            for result in self.database.iter() {
-                let (_key, value): (IVec, IVec) = result?;
-                let item: HItem = bincode::deserialize(&value)?;
-                all_data.push(item);
+            for item in self.items.iter() {
+                if options.favorites {
+                    if item.is_fav() {
+                        all_data.push(item.clone());
+                    }
+                } else {
+                    all_data.push(item.clone());
+                }
             }
+            all_data.sort_by(|a, b| b.hits().cmp(&a.hits()));
             return Ok(all_data);
         }
-        Ok(match options.search_type {
-            SearchType::MonkeyTyping => filter_items_monkey(&self.database, options),
-            SearchType::Exact => filter_items_exact(&self.database, options),
-            SearchType::Regex => filter_items_regex(&self.database, options),
-        })
+        let filtered_results = match options.search_type {
+            SearchType::MonkeyTyping => filter_items_monkey(&self.items, options),
+            SearchType::Exact => filter_items_exact(&self.items, options),
+            SearchType::Regex => filter_items_regex(&self.items, options),
+        };
+        Ok(filtered_results)
     }
 
     fn total(&self) -> anyhow::Result<HLines> {
@@ -55,5 +74,29 @@ impl StoreTrait for VectorStore {
             }
         }
         Ok(favorites)
+    }
+
+    fn mark_favorite(&self, id: &str) {
+        if let Ok(Some(value)) = self.database.get(id.as_bytes()) {
+            if let Ok(mut h_item) = bincode::deserialize::<HItem>(&value) {
+                // mark the entry is fav
+                h_item.flip_fav();
+                if let Ok(bytes) = bincode::serialize(&h_item) {
+                    let _ = self.database.insert(id.as_bytes(), bytes);
+                }
+            }
+        }
+    }
+
+    fn mark_hit(&self, id: &str) {
+        if let Ok(Some(value)) = self.database.get(id.as_bytes()) {
+            if let Ok(mut h_item) = bincode::deserialize::<HItem>(&value) {
+                // increment the history hits
+                h_item.inc_hits();
+                if let Ok(bytes) = bincode::serialize(&h_item) {
+                    let _ = self.database.insert(id.as_bytes(), bytes);
+                }
+            }
+        }
     }
 }
