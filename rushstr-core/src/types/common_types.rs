@@ -12,3 +12,11 @@ pub type HLines = usize;
 
 /// Index within the history
 pub type HIndex = usize;
+
+#[derive(Debug, PartialEq)]
+pub enum Shell {
+    Unknown,
+    Zsh,
+    Bash,
+    Csh,
+}

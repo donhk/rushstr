@@ -4,6 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow.workspace = true
 fuzzy-matcher = "0.3"
 regex = "1"
-uuid.workspace = true
+sha256 = "1.6"
+sled = "0.34"
+bincode = "1.3"
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+temp-env.workspace = true
+serial_test.workspace = true

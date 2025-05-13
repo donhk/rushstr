@@ -64,6 +64,8 @@ impl<'f> InfoBar<'f> {
     }
 
     fn base_info_base(&self, case: &str, matching: &str) -> Vec<Span> {
+        let store_total = self.store.total().ok().unwrap_or(0).to_string();
+        let store_favorites = self.store.favorites().ok().unwrap_or(0).to_string();
         vec![
             Span::raw("HISTORY - (C-f) ⭐ (C-t) match:"),
             Span::styled(format!("{:<15}", matching), Style::default().fg(Color::Blue)),
@@ -72,9 +74,9 @@ impl<'f> InfoBar<'f> {
             Span::raw(" - "),
             Span::styled(self.items.len().to_string(), Style::default().fg(Color::Blue)),
             Span::raw("/"),
-            Span::styled(self.store.total().to_string(), Style::default().fg(Color::Blue)),
+            Span::styled(store_total, Style::default().fg(Color::Blue)),
             Span::raw("/"),
-            Span::styled(self.store.favorites().to_string(), Style::default().fg(Color::Blue)),
+            Span::styled(store_favorites, Style::default().fg(Color::Blue)),
         ]
     }
 
