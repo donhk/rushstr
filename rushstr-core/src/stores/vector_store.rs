@@ -49,6 +49,7 @@ impl StoreTrait for VectorStore {
                     all_data.push(item.clone());
                 }
             }
+            all_data.sort_by(|a, b| b.hits().cmp(&a.hits()));
             return Ok(all_data);
         }
         let filtered_results = match options.search_type {

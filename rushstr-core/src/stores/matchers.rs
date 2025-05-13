@@ -32,7 +32,11 @@ pub fn filter_items_monkey(items: &[HItem], options: &SearchOptions) -> Vec<HIte
             }
         })
         .collect();
-    matches.sort_by(|a, b| b.1.cmp(&a.1));
+    matches.sort_by(|a, b| {
+        b.0.hits()
+            .cmp(&a.0.hits()) // order by hits first
+            .then(b.1.cmp(&a.1)) // then order by score
+    });
     matches.into_iter().map(|(item, _score)| item).collect()
 }
 
