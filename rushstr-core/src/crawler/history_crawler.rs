@@ -17,6 +17,8 @@ impl HScanner for HistoryCrawler {
             let cmds = entry.split("\n").map(|m| m.to_string()).collect::<Vec<_>>();
             h_items.push(HItem::new(cmds)?);
         }
+        // reverse to start by the most recent first
+        h_items.reverse();
         Ok(h_items)
     }
 }

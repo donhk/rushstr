@@ -1,5 +1,6 @@
 use fuzzy_matcher::FuzzyMatcher;
 use fuzzy_matcher::skim::SkimMatcherV2;
+use regex::Regex;
 
 use crate::{HItem, SearchOptions, prepare_string};
 
@@ -80,7 +81,7 @@ pub fn filter_items_regex(items: &[HItem], options: &SearchOptions) -> Vec<HItem
         options.input.clone()
     };
 
-    let re = match regex::Regex::new(&pattern) {
+    let re = match Regex::new(&pattern) {
         Ok(re) => re,
         Err(_) => return vec![], // return empty if the regex is invalid
     };

@@ -1,14 +1,18 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use rushstr_core::{HistoryCrawler, Scanner, Store, VectorStore};
+use clap::Parser;
+use rushstr_core::{ArgsHandler, ConfigOptions, HistoryCrawler, Scanner, Store, VectorStore};
 use rushstr_tui::SearchUI;
 
 fn main() -> Result<()> {
+    let args = ConfigOptions::parse();
+    if ArgsHandler::new(args).execute()? {
+        return Ok(());
+    }
     let scanner: Scanner = Arc::new(HistoryCrawler::new());
     let store: Store = Arc::new(VectorStore::new(scanner)?);
-    let search_box = SearchUI::new(&store);
-    if let Some(text) = search_box.search()? {
+    if let Some(text) = SearchUI::new(&store).search()? {
         println!("{}", text);
     }
     Ok(())

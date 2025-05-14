@@ -1,10 +1,12 @@
+use std::fs::{OpenOptions, read_to_string};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 use sha2::{Digest, Sha256};
 use sled::Db;
 
-use crate::{Config, Shell};
+use crate::{RushstrFiles, Shell};
 
 /// Detects the current user's shell based on the `SHELL` environment variable.
 ///
@@ -150,10 +152,57 @@ pub fn get_home_directory() -> anyhow::Result<String> {
 
 pub fn create_db() -> anyhow::Result<Db> {
     let home = get_home_directory()?;
-    let db_name = Config::DbName.val();
+    let db_name = RushstrFiles::DbName.val();
     let target = format!("{home}/{db_name}");
     let db: Db = sled::open(target)?;
     Ok(db)
+}
+
+/// The Zsh config snippet for integrating rushstr
+const ZSHRC_CONF: &str = r#"
+# RUSHSTR configuration - add this to ~/.zshrc
+rushstr_no_tiocsti() {
+    zle -I
+    { RUSHSTR_OUT="$( { </dev/tty rushstr ${BUFFER}; } 2>&1 1>&3 3>&- )"; } 3>&1;
+    BUFFER="${RUSHSTR_OUT}"
+    CURSOR=${#BUFFER}
+    zle redisplay
+}
+zle -N rushstr_no_tiocsti
+bindkey '\C-r' rushstr_no_tiocsti
+export RUSHSTR_OUT=n
+"#;
+
+/// Appends the RUSHSTR Zsh integration config to ~/.zshrc if not already
+/// present
+pub fn configure_zsh_profile() -> anyhow::Result<()> {
+    let home = env::var("HOME")?;
+    let zshrc_path = PathBuf::from(home).join(".zshrc");
+
+    let existing_content = read_to_string(&zshrc_path).unwrap_or_default();
+
+    if !existing_content.contains("rushstr_no_tiocsti") {
+        let mut file = OpenOptions::new().create(true).append(true).open(&zshrc_path)?;
+        writeln!(file, "\n{}", ZSHRC_CONF)?;
+    }
+
+    Ok(())
+}
+
+pub fn print_settings() -> anyhow::Result<()> {
+    let home = get_home_directory()?;
+    let db_name = RushstrFiles::DbName.val();
+    let target = format!("{home}/{db_name}");
+    println!("settings dir: {}", target);
+    Ok(())
+}
+
+pub fn delete_db() -> anyhow::Result<()> {
+    let home = get_home_directory()?;
+    let db_name = RushstrFiles::DbName.val();
+    let target = format!("{home}/{db_name}");
+    fs::remove_dir_all(target)?;
+    Ok(())
 }
 
 #[cfg(test)]

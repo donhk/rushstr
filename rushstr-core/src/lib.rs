@@ -5,7 +5,9 @@ mod types;
 mod utils;
 
 #[doc(inline)]
-pub use config::configuration::Config;
+pub use config::args_handler::ArgsHandler;
+#[doc(inline)]
+pub use config::configuration::{ConfigOptions, RushstrFiles};
 #[doc(inline)]
 pub use config::search_options::SearchOptions;
 #[doc(inline)]
@@ -25,4 +27,7 @@ pub use types::common_types::{HIndex, HLines, Key, MHItem, Scanner, Shell, Store
 #[doc(inline)]
 pub use types::history_item::HItem;
 #[doc(inline)]
-pub use utils::utilities::{create_db, detect_shell, get_home_directory, hash_string, prepare_string, read_history};
+pub use utils::utilities::{
+    configure_zsh_profile, create_db, delete_db, detect_shell, get_home_directory, hash_string, prepare_string,
+    print_settings, read_history,
+};
