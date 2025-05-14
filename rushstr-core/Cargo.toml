@@ -6,11 +6,11 @@ edition = "2024"
 [dependencies]
 anyhow.workspace = true
 clap.workspace = true
-fuzzy-matcher = "0.3"
-regex = "1"
-sha2 = "0.10"
-sled = "0.34"
-bincode = "2"
+fuzzy-matcher.workspace = true
+regex.workspace = true
+sha2.workspace = true
+sled.workspace = true
+bincode.workspace = true
 
 [dev-dependencies]
 temp-env.workspace = true

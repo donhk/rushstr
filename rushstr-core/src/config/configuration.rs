@@ -17,10 +17,11 @@ impl RushstrFiles {
         }
     }
 
-    /// Returns the byte slice of the file name associated with the enum variant.
+    /// Returns the byte slice of the file name associated with the enum
+    /// variant.
     ///
-    /// Useful for writing the name directly to byte-based APIs (e.g., Sled, file system, etc).
-    ///
+    /// Useful for writing the name directly to byte-based APIs (e.g., Sled,
+    /// file system, etc).
     pub fn bytes(self) -> &'static [u8] {
         self.val().as_bytes()
     }
