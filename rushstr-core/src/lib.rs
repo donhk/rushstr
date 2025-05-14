@@ -21,7 +21,7 @@ pub use stores::store_trait::StoreTrait;
 #[doc(inline)]
 pub use stores::vector_store::VectorStore;
 #[doc(inline)]
-pub use types::common_types::{HIndex, HLines, Key, Scanner, Shell, Store};
+pub use types::common_types::{HIndex, HLines, Key, MHItem, Scanner, Shell, Store};
 #[doc(inline)]
 pub use types::history_item::HItem;
 #[doc(inline)]

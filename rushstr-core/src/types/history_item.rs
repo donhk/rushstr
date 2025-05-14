@@ -1,8 +1,6 @@
 use bincode::{Decode, Encode};
 
-use crate::{HLines, hash_string, Key};
-
-
+use crate::{HLines, Key, hash_string};
 
 /// Represents a multi-line shell command entry.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Encode, Decode)]
