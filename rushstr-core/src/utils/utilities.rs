@@ -4,7 +4,7 @@ use std::{env, fs};
 use sha2::{Digest, Sha256};
 use sled::Db;
 
-use crate::{Config, Shell};
+use crate::{RushstrFiles, Shell};
 
 /// Detects the current user's shell based on the `SHELL` environment variable.
 ///
@@ -150,7 +150,7 @@ pub fn get_home_directory() -> anyhow::Result<String> {
 
 pub fn create_db() -> anyhow::Result<Db> {
     let home = get_home_directory()?;
-    let db_name = Config::DbName.val();
+    let db_name = RushstrFiles::DbName.val();
     let target = format!("{home}/{db_name}");
     let db: Db = sled::open(target)?;
     Ok(db)

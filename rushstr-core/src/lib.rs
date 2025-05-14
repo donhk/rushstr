@@ -5,7 +5,7 @@ mod types;
 mod utils;
 
 #[doc(inline)]
-pub use config::configuration::Config;
+pub use config::configuration::{ConfigOptions, RushstrFiles};
 #[doc(inline)]
 pub use config::search_options::SearchOptions;
 #[doc(inline)]
