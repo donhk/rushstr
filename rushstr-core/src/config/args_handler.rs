@@ -13,13 +13,16 @@ impl ArgsHandler {
     pub fn execute(&self) -> anyhow::Result<bool> {
         if self.options.reset_settings {
             delete_db()?;
+            return Ok(true);
         }
         if self.options.show_settings {
             print_settings()?;
+            return Ok(true);
         }
         if self.options.zsh_shell_conf {
             configure_zsh_profile()?;
+            return Ok(true);
         }
-        Ok(true)
+        Ok(false)
     }
 }
