@@ -1,10 +1,10 @@
 [package]
 name = "rushstr-tui"
-version = "0.2.0"
+version = "1.0.0"
 edition = "2024"
 
 [dependencies]
 ratatui.workspace = true
 anyhow.workspace = true
 arboard.workspace = true
-rushstr-core = { path = "../rushstr-core", version = "0.2.0" }
+rushstr-core = { path = "../rushstr-core", version = "1.0.0" }
