@@ -3,8 +3,7 @@ use fuzzy_matcher::skim::SkimMatcherV2;
 
 use crate::{HItem, SearchOptions, prepare_string};
 
-pub fn filter_items_monkey(items: &[HItem], options: &SearchOptions) -> Vec<HItem> {
-    let matcher = SkimMatcherV2::default();
+pub fn filter_items_monkey(items: &[HItem], options: &SearchOptions, matcher: &SkimMatcherV2) -> Vec<HItem> {
     let input = if options.is_case_insensitive() {
         prepare_string(&options.input).to_lowercase()
     } else {
@@ -15,6 +14,11 @@ pub fn filter_items_monkey(items: &[HItem], options: &SearchOptions) -> Vec<HIte
     let mut matches: Vec<(HItem, i64)> = items
         .iter()
         .filter_map(|item| {
+            if options.favorites {
+                if !item.is_fav() {
+                    return None;
+                }
+            }
             let target = if options.is_case_insensitive() {
                 item.command().to_lowercase()
             } else {
@@ -50,6 +54,11 @@ pub fn filter_items_exact(items: &[HItem], options: &SearchOptions) -> Vec<HItem
     items
         .iter()
         .filter_map(|item| {
+            if options.favorites {
+                if !item.is_fav() {
+                    return None;
+                }
+            }
             let haystack = if options.is_case_insensitive() {
                 item.command().to_lowercase()
             } else {
@@ -79,6 +88,11 @@ pub fn filter_items_regex(items: &[HItem], options: &SearchOptions) -> Vec<HItem
     items
         .iter()
         .filter_map(|item| {
+            if options.favorites {
+                if !item.is_fav() {
+                    return None;
+                }
+            }
             if re.is_match(&item.command()) {
                 Some(item.clone())
             } else {

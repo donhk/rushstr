@@ -67,7 +67,7 @@ impl<'f> InfoBar<'f> {
         let store_total = self.store.total().ok().unwrap_or(0).to_string();
         let store_favorites = self.store.favorites().ok().unwrap_or(0).to_string();
         let favs_style = if self.ui_state.search_options.favorites {
-            Style::default().fg(Color::Blue)
+            Style::default().fg(Color::Cyan)
         } else {
             Style::default()
         };

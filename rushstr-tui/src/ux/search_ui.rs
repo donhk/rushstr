@@ -45,7 +45,7 @@ impl SearchUI {
                         KeyCode::Esc => return Ok(None),
                         KeyCode::Char('x') if key.modifiers == KeyModifiers::CONTROL => {
                             if let Some(item) = items.get(ui_state.selected) {
-                                self.store.mark_favorite(item.id());
+                                self.store.mark_favorite(&item.id());
                             }
                         },
                         KeyCode::Char('f') if key.modifiers == KeyModifiers::CONTROL => {
@@ -111,7 +111,7 @@ impl SearchUI {
 /// * `Ok(None)` if the selection index is out of bounds.
 fn get_selected(items: &[HItem], ui_state: &UiState, store: &Store) -> anyhow::Result<Option<String>> {
     if let Some(h_item) = items.get(ui_state.selected) {
-        store.mark_hit(h_item.id());
+        store.mark_hit(&h_item.id());
         return Ok(Some(h_item.raw_text()));
     }
     Ok(None)

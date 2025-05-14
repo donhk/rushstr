@@ -1,5 +1,5 @@
 use crate::HItem;
 
 pub trait HScanner {
-    fn load(&self) -> Vec<HItem>;
+    fn load(&self) -> anyhow::Result<Vec<HItem>>;
 }

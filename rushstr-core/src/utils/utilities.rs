@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use sha256::digest;
+use sha2::{Digest, Sha256};
 use sled::Db;
 
 use crate::{Config, Shell};
@@ -130,8 +130,10 @@ fn unescape_zsh(command: &str) -> String {
 /// # Returns
 ///
 /// A `String` containing the SHA-256 hash in hexadecimal format.
-pub fn hash_string(line: &str) -> String {
-    digest(line)
+pub fn hash_string(line: &str) -> Vec<u8> {
+    let mut hasher = Sha256::new();
+    hasher.update(line.as_bytes());
+    hasher.finalize().to_vec()
 }
 
 pub fn prepare_string(text: &str) -> String {
