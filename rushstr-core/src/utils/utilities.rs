@@ -3,6 +3,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
+use regex::Regex;
 use sha2::{Digest, Sha256};
 use sled::Db;
 
@@ -58,34 +59,41 @@ pub fn detect_shell() -> Shell {
 pub fn read_history(shell: Shell) -> Vec<String> {
     let home = match env::var("HOME") {
         Ok(path) => PathBuf::from(path),
-        Err(_) => return vec![],
+        Err(_) => return vec!["default1".to_string()],
     };
 
     let history_file = match shell {
         Shell::Zsh => home.join(".zsh_history"),
         Shell::Bash => home.join(".bash_history"),
         Shell::Csh => home.join(".history"),
-        Shell::Unknown => return vec![],
+        Shell::Unknown => return vec!["default2".to_string()],
     };
 
-    let contents = match fs::read_to_string(&history_file) {
-        Ok(contents) => contents,
-        Err(_) => return vec![],
+    let contents = match fs::read(&history_file) {
+        Ok(data) => String::from_utf8_lossy(&data).into_owned(),
+        Err(_) => return vec!["failed to read history".to_string()],
     };
-
     let mut commands = Vec::new();
     let mut current_command = String::new();
     let mut in_multiline = false;
 
     for line in contents.lines() {
+        let line = &clean_history_line(line.trim());
+        if line.is_empty() {
+            continue;
+        }
+        // Skip corrupted or binary-looking lines
+        if looks_corrupted(line) {
+            continue;
+        }
+
         if line.starts_with(": ") {
-            // Finalize previous command
+            // Zsh extended history entry
             if !current_command.is_empty() {
                 commands.push(unescape_zsh(&current_command));
                 current_command.clear();
             }
 
-            // Start a new command
             if let Some(cmd) = line.splitn(2, ';').nth(1) {
                 let trimmed = cmd.trim_end_matches('\\');
                 current_command.push_str(trimmed);
@@ -102,8 +110,10 @@ pub fn read_history(shell: Shell) -> Vec<String> {
                 current_command.push('\n');
             }
         } else {
-            // Bash or Csh
-            commands.push(line.to_string());
+            // Bash or Csh single-line history
+            if !looks_corrupted(line) {
+                commands.push(line.to_string());
+            }
         }
     }
 
@@ -114,9 +124,40 @@ pub fn read_history(shell: Shell) -> Vec<String> {
     commands
 }
 
-/// Removes escaping (like double backslashes).
+/// Removes Zsh escaping (e.g., `\\` becomes `\`)
 fn unescape_zsh(command: &str) -> String {
     command.replace("\\\\", "\\")
+}
+
+/// Detects whether a line looks corrupted or is filled with ANSI/binary garbage
+fn looks_corrupted(line: &str) -> bool {
+    // ANSI escape codes like \x1b[ or ^[[
+    line.contains("\x1b[") || line.contains("^[[")
+
+        // Or: if the line contains too many non-printable/control characters
+        || line.chars().filter(|c| c.is_control() && !c.is_ascii_whitespace()).count() > 5
+
+        // Or: if it's very long and suspiciously dense
+        || line.len() > 1000
+}
+
+fn remove_control_chars(input: &str) -> String {
+    input.chars().filter(|c| !c.is_control()).collect()
+}
+
+fn strip_ansi_sequences(s: &str) -> String {
+    // Matches ANSI escape codes like \x1B[31m or \x1B[0m
+    let ansi_regex = Regex::new(r"\x1B\[[0-9;]*[mK]").unwrap();
+    ansi_regex.replace_all(s, "").to_string()
+}
+
+fn strip_non_printable(input: &str) -> String {
+    input.chars().filter(|c| c.is_ascii_graphic() || *c == ' ').collect()
+}
+
+fn clean_history_line(input: &str) -> String {
+    let cleaned = strip_ansi_sequences(&strip_non_printable(input));
+    remove_control_chars(&cleaned)
 }
 
 /// Computes the SHA-256 hash of the given string and returns it as a lowercase

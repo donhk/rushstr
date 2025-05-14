@@ -13,7 +13,7 @@ fn main() -> Result<()> {
     let scanner: Scanner = Arc::new(HistoryCrawler::new());
     let store: Store = Arc::new(VectorStore::new(scanner)?);
     if let Some(text) = SearchUI::new(&store).search()? {
-        println!("{}", text);
+        print!("{}", text.trim_end());
     }
     Ok(())
 }
