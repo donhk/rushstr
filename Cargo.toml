@@ -9,7 +9,14 @@ resolver = "2"
 
 [workspace.dependencies]
 anyhow = "1"
-thiserror = "2"
 ratatui = { version = "0.29.0", features = ["all-widgets"] }
 temp-env = "0.3"
 serial_test = "3.2"
+clap = { version = "4.5.38", features = ["derive"] }
+
+[workspace.package]
+description = "An interactive, Rust-powered shell history search tool inspired by hstr"
+license = "MIT"
+repository = "https://github.com/donhk/rushstr"
+documentation = "https://github.com/donhk/rushstr"
+homepage = "https://github.com/donhk/rushstr"

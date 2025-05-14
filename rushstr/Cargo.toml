@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 anyhow.workspace = true
-thiserror.workspace = true
-ratatui.workspace = true
-rushstr-core = { path = "../rushstr-core" }
-rushstr-tui = { path = "../rushstr-tui" }
+clap.workspace = true
+rushstr-core = { path = "../rushstr-core", version = "0.1.0" }
+rushstr-tui = { path = "../rushstr-tui", version = "0.1.0" }

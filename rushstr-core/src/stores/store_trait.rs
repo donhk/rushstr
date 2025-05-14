@@ -1,4 +1,4 @@
-use crate::{HItem, HLines, SearchOptions};
+use crate::{HItem, HLines, Key, SearchOptions};
 
 /// Defines the interface for a searchable and interactive item store.
 ///
@@ -40,7 +40,7 @@ pub trait StoreTrait {
     /// # Arguments
     ///
     /// * `id` - A unique identifier corresponding to an `HItem`.
-    fn mark_favorite(&self, id: &str);
+    fn mark_favorite(&self, id: &Key);
 
     /// Increments the "hit" count for the item with the given ID.
     ///
@@ -49,5 +49,5 @@ pub trait StoreTrait {
     /// # Arguments
     ///
     /// * `id` - A unique identifier corresponding to an `HItem`.
-    fn mark_hit(&self, id: &str);
+    fn mark_hit(&self, id: &Key);
 }

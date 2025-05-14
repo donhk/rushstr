@@ -5,7 +5,7 @@ mod types;
 mod utils;
 
 #[doc(inline)]
-pub use config::configuration::Config;
+pub use config::configuration::{ConfigOptions, RushstrFiles};
 #[doc(inline)]
 pub use config::search_options::SearchOptions;
 #[doc(inline)]
@@ -21,7 +21,7 @@ pub use stores::store_trait::StoreTrait;
 #[doc(inline)]
 pub use stores::vector_store::VectorStore;
 #[doc(inline)]
-pub use types::common_types::{HIndex, HLines, Scanner, Shell, Store};
+pub use types::common_types::{HIndex, HLines, Key, MHItem, Scanner, Shell, Store};
 #[doc(inline)]
 pub use types::history_item::HItem;
 #[doc(inline)]

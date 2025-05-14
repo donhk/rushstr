@@ -1,10 +1,10 @@
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use sha256::digest;
+use sha2::{Digest, Sha256};
 use sled::Db;
 
-use crate::{Config, Shell};
+use crate::{RushstrFiles, Shell};
 
 /// Detects the current user's shell based on the `SHELL` environment variable.
 ///
@@ -130,8 +130,10 @@ fn unescape_zsh(command: &str) -> String {
 /// # Returns
 ///
 /// A `String` containing the SHA-256 hash in hexadecimal format.
-pub fn hash_string(line: &str) -> String {
-    digest(line)
+pub fn hash_string(line: &str) -> Vec<u8> {
+    let mut hasher = Sha256::new();
+    hasher.update(line.as_bytes());
+    hasher.finalize().to_vec()
 }
 
 pub fn prepare_string(text: &str) -> String {
@@ -148,7 +150,7 @@ pub fn get_home_directory() -> anyhow::Result<String> {
 
 pub fn create_db() -> anyhow::Result<Db> {
     let home = get_home_directory()?;
-    let db_name = Config::DbName.val();
+    let db_name = RushstrFiles::DbName.val();
     let target = format!("{home}/{db_name}");
     let db: Db = sled::open(target)?;
     Ok(db)

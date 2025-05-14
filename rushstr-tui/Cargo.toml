@@ -7,4 +7,4 @@ edition = "2024"
 ratatui.workspace = true
 anyhow.workspace = true
 arboard = "3"
-rushstr-core = { path = "../rushstr-core" }
+rushstr-core = { path = "../rushstr-core", version = "0.1.0" }
