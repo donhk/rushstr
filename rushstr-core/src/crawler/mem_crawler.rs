@@ -5,7 +5,7 @@ pub struct MemCrawler {
 }
 
 impl MemCrawler {
-    pub fn new() -> Self {
+    pub fn new() -> anyhow::Result<Self> {
         let all_items = vec![
             "sudo echo \"hola\"".to_string(),
             "time".to_string(),
@@ -143,14 +143,14 @@ export LOG_LEVEL=debug".to_string(),
         let mut h_items = Vec::new();
         for item in all_items {
             let cmds = item.split("\n").map(|m| m.to_string()).collect::<Vec<_>>();
-            h_items.push(HItem::new(cmds))
+            h_items.push(HItem::new(cmds)?)
         }
-        Self { all_items: h_items }
+        Ok(Self { all_items: h_items })
     }
 }
 
 impl HScanner for MemCrawler {
-    fn load(&self) -> Vec<HItem> {
-        self.all_items.clone()
+    fn load(&self) -> anyhow::Result<Vec<HItem>> {
+        Ok(self.all_items.clone())
     }
 }

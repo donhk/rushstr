@@ -13,6 +13,9 @@ pub type HLines = usize;
 /// Index within the history
 pub type HIndex = usize;
 
+/// h item key
+pub type Key = [u8; 32];
+
 #[derive(Debug, PartialEq)]
 pub enum Shell {
     Unknown,

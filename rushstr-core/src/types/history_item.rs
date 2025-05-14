@@ -1,13 +1,15 @@
-use serde::{Deserialize, Serialize};
+use bincode::{Decode, Encode};
 
-use crate::{HLines, hash_string};
+use crate::{HLines, hash_string, Key};
+
+
 
 /// Represents a multi-line shell command entry.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Encode, Decode)]
 pub struct HItem {
     /// A list of strings, each representing a line of the command.
     command: Vec<String>,
-    id: String,
+    id: Key,
     favorite: bool,
     hits: u64,
 }
@@ -23,14 +25,14 @@ impl HItem {
     /// # Returns
     ///
     /// A new instance of `HItem`.
-    pub fn new(command: Vec<String>) -> HItem {
-        let id = hash_string(&*command.join("\n"));
-        Self {
+    pub fn new(command: Vec<String>) -> anyhow::Result<HItem> {
+        let id = hash_string(&*command.join("\n")).try_into().expect("sha256 bytes");
+        Ok(Self {
             command,
             id,
             favorite: false,
             hits: 0,
-        }
+        })
     }
 
     /// Returns the number of lines in the command.
@@ -71,8 +73,8 @@ impl HItem {
         self.command.clone()
     }
 
-    pub fn id(&self) -> &str {
-        &self.id
+    pub fn id(&self) -> Key {
+        self.id
     }
 
     pub fn is_fav(&self) -> bool {

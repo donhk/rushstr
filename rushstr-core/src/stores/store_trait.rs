@@ -1,4 +1,6 @@
-use crate::{HItem, HLines, SearchOptions};
+use std::rc::Rc;
+
+use crate::{HItem, HLines, Key, SearchOptions};
 
 /// Defines the interface for a searchable and interactive item store.
 ///
@@ -17,7 +19,7 @@ pub trait StoreTrait {
     ///
     /// A list of `HItem`s matching the given options, or an error if the
     /// operation fails.
-    fn items(&self, options: &SearchOptions) -> anyhow::Result<Vec<HItem>>;
+    fn items(&self, options: &SearchOptions) -> anyhow::Result<Vec<&Rc<HItem>>>;
 
     /// Returns the total number of stored items.
     ///
@@ -40,7 +42,7 @@ pub trait StoreTrait {
     /// # Arguments
     ///
     /// * `id` - A unique identifier corresponding to an `HItem`.
-    fn mark_favorite(&self, id: &str);
+    fn mark_favorite(&mut self, id: &Key);
 
     /// Increments the "hit" count for the item with the given ID.
     ///
@@ -49,5 +51,5 @@ pub trait StoreTrait {
     /// # Arguments
     ///
     /// * `id` - A unique identifier corresponding to an `HItem`.
-    fn mark_hit(&self, id: &str);
+    fn mark_hit(&mut self, id: &Key);
 }
