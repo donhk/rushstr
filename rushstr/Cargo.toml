@@ -1,10 +1,10 @@
 [package]
 name = "rushstr"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2024"
 
 [dependencies]
 anyhow.workspace = true
 clap.workspace = true
-rushstr-core = { path = "../rushstr-core", version = "1.0.0" }
-rushstr-tui = { path = "../rushstr-tui", version = "1.0.0" }
+rushstr-core = { path = "../rushstr-core", version = "1.1.0" }
+rushstr-tui = { path = "../rushstr-tui", version = "1.1.0" }
