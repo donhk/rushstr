@@ -1,27 +1,39 @@
 project_name: rushstr
 
+skip:
+  go_install: true
+
 builds:
   - id: rushstr
     binary: rushstr
     main: .
-    goarch:
-      - amd64
-      - arm64
-    goos:
-      - linux
-      - darwin
     targets:
       - x86_64-unknown-linux-gnu
-      - aarch64-unknown-linux-gnu
       - aarch64-apple-darwin
+    env:
+      - RUSTFLAGS=-C target-cpu=native
 
 archives:
-  - format: tar.gz
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - id: tarball-linux
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_Linux_x86_64"
+    builds: [rushstr]
     files:
       - LICENSE
       - README.md
       - rushstr
+    goos: [linux]
+
+  - id: dmg-macos
+    format: dmg
+    name_template: "{{ .ProjectName }}_{{ .Version }}_macOS_arm64"
+    builds: [rushstr]
+    files:
+      - LICENSE
+      - README.md
+      - rushstr
+    goos: [darwin]
+    goarch: [arm64]
 
 checksum:
   name_template: "checksums.txt"
