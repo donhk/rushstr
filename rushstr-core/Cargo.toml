@@ -2,6 +2,11 @@
 name = "rushstr-core"
 version = "1.2.0"
 edition = "2024"
+description = "An interactive, Rust-powered shell history search tool inspired by hstr"
+license = "MIT"
+repository = "https://github.com/donhk/rushstr"
+documentation = "https://github.com/donhk/rushstr"
+homepage = "https://github.com/donhk/rushstr"
 
 [dependencies]
 anyhow.workspace = true

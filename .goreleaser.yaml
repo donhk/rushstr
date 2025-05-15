@@ -1,0 +1,26 @@
+project_name: rushstr
+
+builds:
+  - id: rushstr
+    binary: rushstr
+    main: .
+    command: cross
+    targets:
+      - x86_64-unknown-linux-gnu
+      - aarch64-apple-darwin
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+      - rushstr
+
+checksum:
+  name_template: "checksums.txt"
+
+release:
+  github:
+    owner: donhk
+    name: rushstr
