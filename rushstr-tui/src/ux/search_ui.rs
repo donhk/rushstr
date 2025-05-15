@@ -5,7 +5,6 @@ use ratatui::DefaultTerminal;
 use ratatui::crossterm::event::{
     DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
 };
-use ratatui::crossterm::terminal::{LeaveAlternateScreen, disable_raw_mode};
 use ratatui::crossterm::{event, execute};
 use rushstr_core::{HItem, Store};
 
@@ -30,9 +29,7 @@ impl SearchUI {
 
         // === Ensure terminal is cleanly restored before printing ===
         execute!(stdout(), DisableMouseCapture)?;
-        disable_raw_mode()?;
-        execute!(stdout(), LeaveAlternateScreen)?;
-        terminal.show_cursor()?;
+        ratatui::restore();
 
         result
     }
