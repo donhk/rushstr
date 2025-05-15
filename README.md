@@ -1,16 +1,16 @@
-# rushstr
+# 🚀 rushstr
 
-**rushstr** is a blazing-fast, Rust-powered interactive shell history searcher inspired by [`hstr`](https://github.com/dvorka/hstr). Navigate, search, and reuse your command-line history with speed and style.
+**rushstr** is a fast, Rust-powered interactive shell history searcher — a modern, dependency-free alternative to [`hstr`](https://github.com/dvorka/hstr). Search, filter, and reuse your command-line history with fuzzy matching and a responsive TUI.
 
 ---
 
-## ✨ Features
+## ✨ Highlights
 
-- 🚀 Fast and lightweight — written in Rust
-- 🔍 Fuzzy search through your shell history
-- ⌨️ Keyboard-driven interactive UI
-- 🧠 Learns from your usage patterns (coming soon!)
-- 💻 Works with Bash, Zsh, and Fish shells
+- ⚡ **Blazing fast** — implemented in pure Rust
+- 🔍 **Fuzzy, regex, and exact** matchers
+- 🎯 **Keyboard-first interface** — no mouse needed
+- 💾 **Persistent command history** with favorites and usage stats
+- 🐚 **Zsh support** — seamlessly integrates into your existing shell
 
 ---
 
@@ -18,7 +18,7 @@
 
 ### Using `cargo`
 
-```bash
+```zsh
 cargo install rushstr
 ```
 
@@ -26,73 +26,54 @@ cargo install rushstr
 
 ### From source
 
-```bash
+```zsh
 git clone https://github.com/donhk/rushstr.git
 cd rushstr
 cargo build --release
 ./target/release/rushstr
 ```
 
+### Pre-built binaries
+
+_Coming soon..._
+
 ---
 
 ## 🔧 Shell Integration
 
-Enable `rushstr` as your reverse history search (e.g., replacing `Ctrl+R`):
-
-### Bash
-
-Add this to your `~/.bashrc`:
-
-```bash
-bind -x '"\C-r": "rushstr"'
-```
-
-Then apply changes:
-
-```bash
-source ~/.bashrc
-```
-
----
+To use `rushstr` as your reverse history search (e.g., replacing `Ctrl+R`):
 
 ### Zsh
 
 Add this to your `~/.zshrc`:
 
 ```zsh
-bindkey '^R' rushstr
+eval "$(rushstr --zsh-shell-conf)"
 ```
 
-Then apply changes:
+Then apply the changes:
 
-```bash
+```zsh
 source ~/.zshrc
 ```
 
 ---
 
-### Fish
+## 🎮 Keybindings
 
-Add this to your `~/.config/fish/config.fish`:
-
-```fish
-function rushstr_search
-    rushstr
-end
-bind \cr rushstr_search
-```
-
-Then apply changes:
-
-```fish
-source ~/.config/fish/config.fish
-```
+| Key Combo | Action                          |
+|-----------|---------------------------------|
+| `Ctrl+X`  | Mark/unmark as favorite         |
+| `Ctrl+F`  | Show only favorites             |
+| `Ctrl+T`  | Switch between matching modes   |
+| `Enter`   | Select and print command        |
+| `Ctrl+C`  | Copy selected command to clipboard and exit |
 
 ---
 
-## 📸 Screenshots
+## 📸 Screenshot
 
-<img src="./assets/demo.gif" alt="rushstr demo" width="600"/>
+<img src="./assets/demo.png" alt="rushstr demo" width="600"/>
 
 ---
 
@@ -107,3 +88,7 @@ cargo test
 ```
 
 ---
+
+## 💡 Tip
+
+rushstr stores usage stats and favorites automatically. You can build tools on top of this data to personalize your CLI experience even further.
