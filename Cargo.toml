@@ -26,3 +26,7 @@ license = "MIT"
 repository = "https://github.com/donhk/rushstr"
 documentation = "https://github.com/donhk/rushstr"
 homepage = "https://github.com/donhk/rushstr"
+
+[[bin]]
+name = "rushstr"
+path = "rushstr/src/main.rs"
