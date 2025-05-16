@@ -199,8 +199,20 @@ pub fn create_db() -> anyhow::Result<Db> {
     Ok(db)
 }
 
-/// The Zsh config snippet for integrating rushstr
-const ZSHRC_CONF: &str = r#"
+#[cfg(target_os = "macos")]
+const ZSHRC_SNIPPET: &str = r#"
+# RUSHSTR configuration - add this to ~/.zshrc
+rushstr_widget() {
+  BUFFER=$(rushstr)
+  CURSOR=${#BUFFER}
+  zle reset-prompt
+}
+zle -N rushstr_widget
+bindkey '^R' rushstr_widget
+"#;
+
+#[cfg(not(target_os = "macos"))]
+const ZSHRC_SNIPPET: &str = r#"
 # RUSHSTR configuration - add this to ~/.zshrc
 rushstr_no_tiocsti() {
     zle -I
@@ -222,9 +234,9 @@ pub fn configure_zsh_profile() -> anyhow::Result<()> {
 
     let existing_content = read_to_string(&zshrc_path).unwrap_or_default();
 
-    if !existing_content.contains("rushstr_no_tiocsti") {
+    if !existing_content.contains("rushstr_widget") && !existing_content.contains("rushstr_no_tiocsti") {
         let mut file = OpenOptions::new().create(true).append(true).open(&zshrc_path)?;
-        writeln!(file, "\n{ZSHRC_CONF}")?;
+        writeln!(file, "\n{ZSHRC_SNIPPET}")?;
     }
 
     Ok(())
