@@ -35,26 +35,23 @@ cargo build --release
 
 ### Pre-built binaries
 
-_Coming soon..._
-
----
-
-## 🔧 Shell Integration
-
-To use `rushstr` as your reverse history search (e.g., replacing `Ctrl+R`):
-
-### Zsh
-
-Add this to your `~/.zshrc`:
+# 🔧 MacOS
 
 ```zsh
-eval "$(rushstr --zsh-shell-conf)"
+# one time
+brew tap donhk/homebrew-tap
+# install
+brew install donhk/homebrew-tap/rushstr
+rushstr --zsh-shell-conf
+source ~/.zshrc
+# upgrade
+brew upgrade donhk/homebrew-tap/rushstr
 ```
 
-Then apply the changes:
+# 🔧 Linux
 
 ```zsh
-source ~/.zshrc
+curl -sSL https://raw.githubusercontent.com/donhk/rushstr/main/install.sh | zsh
 ```
 
 ---
