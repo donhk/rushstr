@@ -199,8 +199,7 @@ pub fn create_db() -> anyhow::Result<Db> {
     Ok(db)
 }
 
-/// The Zsh config snippet for integrating rushstr
-const ZSHRC_CONF: &str = r#"
+const ZSHRC_SNIPPET: &str = r#"
 # RUSHSTR configuration - add this to ~/.zshrc
 rushstr_no_tiocsti() {
     zle -I
@@ -211,7 +210,6 @@ rushstr_no_tiocsti() {
 }
 zle -N rushstr_no_tiocsti
 bindkey '\C-r' rushstr_no_tiocsti
-export RUSHSTR_OUT=n
 "#;
 
 /// Appends the RUSHSTR Zsh integration config to ~/.zshrc if not already
@@ -222,9 +220,9 @@ pub fn configure_zsh_profile() -> anyhow::Result<()> {
 
     let existing_content = read_to_string(&zshrc_path).unwrap_or_default();
 
-    if !existing_content.contains("rushstr_no_tiocsti") {
+    if !existing_content.contains("rushstr_widget") {
         let mut file = OpenOptions::new().create(true).append(true).open(&zshrc_path)?;
-        writeln!(file, "\n{ZSHRC_CONF}")?;
+        writeln!(file, "\n{ZSHRC_SNIPPET}")?;
     }
 
     Ok(())
