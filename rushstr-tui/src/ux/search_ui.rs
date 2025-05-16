@@ -1,11 +1,11 @@
 use std::io::stdout;
 
 use arboard::Clipboard;
-use ratatui::DefaultTerminal;
-use ratatui::crossterm::event::{
+use crossterm::event::{
     DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyModifiers, MouseButton, MouseEventKind,
 };
-use ratatui::crossterm::{event, execute};
+use crossterm::{event, execute};
+use ratatui::DefaultTerminal;
 use rushstr_core::{HItem, Store};
 
 use crate::UiState;

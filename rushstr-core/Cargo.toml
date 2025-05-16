@@ -1,6 +1,6 @@
 [package]
 name = "rushstr-core"
-version = "1.2.5"
+version = "1.4.0"
 edition = "2024"
 description = "An interactive, Rust-powered shell history search tool inspired by hstr"
 license = "MIT"
