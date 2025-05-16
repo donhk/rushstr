@@ -94,7 +94,7 @@ pub fn read_history(shell: Shell) -> Vec<String> {
                 current_command.clear();
             }
 
-            if let Some(cmd) = line.splitn(2, ';').nth(1) {
+            if let Some(cmd) = line.split_once(';').map(|x| x.1) {
                 let trimmed = cmd.trim_end_matches('\\');
                 current_command.push_str(trimmed);
                 in_multiline = cmd.trim_end().ends_with('\\');
@@ -224,7 +224,7 @@ pub fn configure_zsh_profile() -> anyhow::Result<()> {
 
     if !existing_content.contains("rushstr_no_tiocsti") {
         let mut file = OpenOptions::new().create(true).append(true).open(&zshrc_path)?;
-        writeln!(file, "\n{}", ZSHRC_CONF)?;
+        writeln!(file, "\n{ZSHRC_CONF}")?;
     }
 
     Ok(())
@@ -234,7 +234,7 @@ pub fn print_settings() -> anyhow::Result<()> {
     let home = get_home_directory()?;
     let db_name = RushstrFiles::DbName.val();
     let target = format!("{home}/{db_name}");
-    println!("settings dir: {}", target);
+    println!("settings dir: {target}");
     Ok(())
 }
 

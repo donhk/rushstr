@@ -15,10 +15,8 @@ pub fn filter_items_monkey(items: &[HItem], options: &SearchOptions, matcher: &S
     let mut matches: Vec<(HItem, i64)> = items
         .iter()
         .filter_map(|item| {
-            if options.favorites {
-                if !item.is_fav() {
-                    return None;
-                }
+            if options.favorites && !item.is_fav() {
+                return None;
             }
             let target = if options.is_case_insensitive() {
                 item.command().to_lowercase()
@@ -55,10 +53,8 @@ pub fn filter_items_exact(items: &[HItem], options: &SearchOptions) -> Vec<HItem
     items
         .iter()
         .filter_map(|item| {
-            if options.favorites {
-                if !item.is_fav() {
-                    return None;
-                }
+            if options.favorites && !item.is_fav() {
+                return None;
             }
             let haystack = if options.is_case_insensitive() {
                 item.command().to_lowercase()
@@ -89,10 +85,8 @@ pub fn filter_items_regex(items: &[HItem], options: &SearchOptions) -> Vec<HItem
     items
         .iter()
         .filter_map(|item| {
-            if options.favorites {
-                if !item.is_fav() {
-                    return None;
-                }
+            if options.favorites && !item.is_fav() {
+                return None;
             }
             if re.is_match(&item.command()) {
                 Some(item.clone())

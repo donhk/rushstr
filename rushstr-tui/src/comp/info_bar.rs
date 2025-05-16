@@ -77,9 +77,9 @@ impl<'f> InfoBar<'f> {
             Span::styled(" (C-f)", favs_style),
             Span::raw(" (C-t)"),
             Span::raw(" match:"),
-            Span::styled(format!("{:<15}", matching), Style::default().fg(Color::Blue)),
+            Span::styled(format!("{matching:<15}"), Style::default().fg(Color::Blue)),
             Span::raw("case:"),
-            Span::styled(format!("{:<15}", case), Style::default().fg(Color::Blue)),
+            Span::styled(format!("{case:<15}"), Style::default().fg(Color::Blue)),
             Span::raw(" - "),
             Span::styled(self.items.len().to_string(), Style::default().fg(Color::Blue)),
             Span::raw("/"),
@@ -94,13 +94,13 @@ impl<'f> InfoBar<'f> {
         let mut parts = self.base_info_base(case, matching);
         let debug = vec![
             Span::raw(" 🐛 height:"),
-            Span::styled(format!("{:<4}", height), Style::default().fg(Color::Yellow)),
+            Span::styled(format!("{height:<4}"), Style::default().fg(Color::Yellow)),
             Span::raw("selected:"),
             Span::styled(format!("{:<4}", self.ui_state.selected), Style::default().fg(Color::Yellow)),
             Span::raw("offset:"),
             Span::styled(format!("{:<4}", self.ui_state.offset), Style::default().fg(Color::Yellow)),
             Span::raw("h_to_selected:"),
-            Span::styled(format!("{:<4}", h_to_selected), Style::default().fg(Color::Yellow)),
+            Span::styled(format!("{h_to_selected:<4}"), Style::default().fg(Color::Yellow)),
         ];
         parts.extend(debug);
         parts

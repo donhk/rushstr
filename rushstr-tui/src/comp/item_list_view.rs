@@ -37,7 +37,7 @@ impl<'f> ItemListView<'f> {
         let list_items: Vec<ListItem> = items
             .into_iter()
             .enumerate()
-            .map(|(index, item)| format_item(index, item, &self.ui_state))
+            .map(|(index, item)| format_item(index, item, self.ui_state))
             .collect();
 
         let list = List::new(list_items).block(Block::default().borders(Borders::NONE));

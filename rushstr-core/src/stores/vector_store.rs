@@ -35,17 +35,17 @@ impl VectorStore {
                 continue;
             }
 
-            let final_item = if let Ok(Some(i_vec)) = database.get(&key) {
+            let final_item = if let Ok(Some(i_vec)) = database.get(key) {
                 let (hitem, _): (HItem, usize) = bincode::decode_from_slice(&i_vec, config)?;
                 hitem
             } else {
                 let bytes = bincode::encode_to_vec(&item, config)?;
-                database.insert(&key, bytes)?;
+                database.insert(key, bytes)?;
                 item
             };
 
             let rc_item = Rc::new(Mutex::new(final_item));
-            items_index.insert(key.clone(), rc_item.clone());
+            items_index.insert(key, rc_item.clone());
             items.push(rc_item);
         }
 

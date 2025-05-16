@@ -1,12 +1,12 @@
 use std::rc::Rc;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use crate::crawler::scanner::HScanner;
 use crate::{HItem, StoreTrait};
 
-pub type Scanner = Arc<dyn HScanner>;
+pub type Scanner = Rc<dyn HScanner>;
 
-pub type Store = Arc<dyn StoreTrait>;
+pub type Store = Rc<dyn StoreTrait>;
 
 /// Number of Height Lines
 pub type HLines = usize;

@@ -24,7 +24,7 @@ impl HItem {
     ///
     /// A new instance of `HItem`.
     pub fn new(command: Vec<String>) -> anyhow::Result<HItem> {
-        let id = hash_string(&*command.join("\n")).try_into().expect("sha256 bytes");
+        let id = hash_string(&command.join("\n")).try_into().expect("sha256 bytes");
         Ok(Self {
             command,
             id,
