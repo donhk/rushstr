@@ -13,3 +13,7 @@ anyhow.workspace = true
 clap.workspace = true
 rushstr-core = { path = "../rushstr-core", version = "1.2.5" }
 rushstr-tui = { path = "../rushstr-tui", version = "1.2.5" }
+
+[[bin]]
+name = "rushstr"
+path = "src/main.rs"

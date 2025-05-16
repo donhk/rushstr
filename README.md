@@ -86,9 +86,3 @@ cargo run
 # Run tests
 cargo test
 ```
-
----
-
-## 💡 Tip
-
-rushstr stores usage stats and favorites automatically. You can build tools on top of this data to personalize your CLI experience even further.

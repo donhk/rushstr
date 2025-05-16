@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 use anyhow::Result;
 use clap::Parser;
@@ -10,8 +10,8 @@ fn main() -> Result<()> {
     if ArgsHandler::new(args).execute()? {
         return Ok(());
     }
-    let scanner: Scanner = Arc::new(HistoryCrawler::new());
-    let store: Store = Arc::new(VectorStore::new(scanner)?);
+    let scanner: Scanner = Rc::new(HistoryCrawler::new());
+    let store: Store = Rc::new(VectorStore::new(scanner)?);
     if let Some(text) = SearchUI::new(&store).search()? {
         eprint!("{}", text.trim_end());
     }

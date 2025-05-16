@@ -2,6 +2,12 @@ use crate::{HItem, HScanner, detect_shell, read_history};
 
 pub struct HistoryCrawler {}
 
+impl Default for HistoryCrawler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HistoryCrawler {
     pub fn new() -> Self {
         Self {}
