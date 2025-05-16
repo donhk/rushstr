@@ -33,9 +33,9 @@ cargo build --release
 ./target/release/rushstr
 ```
 
-### Pre-built binaries
+## Pre-built binaries
 
-# 🔧 MacOS
+### 🔧 MacOS
 
 ```zsh
 # one time
@@ -48,7 +48,7 @@ source ~/.zshrc
 brew upgrade donhk/homebrew-tap/rushstr
 ```
 
-# 🔧 Linux
+### 🔧 Linux
 
 ```zsh
 curl -sSL https://raw.githubusercontent.com/donhk/rushstr/main/install.sh | zsh
