@@ -16,23 +16,6 @@
 
 ## 📦 Installation
 
-### Using `cargo`
-
-```zsh
-cargo install rushstr
-```
-
-> Requires [Rust](https://www.rust-lang.org/tools/install)
-
-### From source
-
-```zsh
-git clone https://github.com/donhk/rushstr.git
-cd rushstr
-cargo build --release
-./target/release/rushstr
-```
-
 ## Pre-built binaries
 
 ### 🔧 MacOS
@@ -55,6 +38,23 @@ curl -sSL https://raw.githubusercontent.com/donhk/rushstr/main/install.sh | zsh
 ```
 
 ---
+
+### Using `cargo`
+
+```zsh
+cargo install rushstr
+```
+
+> Requires [Rust](https://www.rust-lang.org/tools/install)
+
+### From source
+
+```zsh
+git clone https://github.com/donhk/rushstr.git
+cd rushstr
+cargo build --release
+./target/release/rushstr
+```
 
 ## 🎮 Keybindings
 
