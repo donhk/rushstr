@@ -6,7 +6,7 @@ WORKDIR="$(pwd)"
 
 ARCH="$(uname -m)"
 case "$ARCH" in
-  x86_64) ARCH_ID="x86_64-linux" ;;
+  x86_64) ARCH_ID="x86_64-musl" ;;
   aarch64) ARCH_ID="aarch64-linux" ;;
   *) echo "Unsupported architecture: $ARCH" && exit 1 ;;
 esac
@@ -34,7 +34,8 @@ pushd $TOOLS_DIR
 echo "📦 Extracting...$TOOLS_DIR/$FILENAME"
 tar -xf "$FILENAME"
 mv "$TOOLS_DIR/$BASE_NAME/rushstr" "$TOOLS_DIR"
-rm "$FILENAME"
+rm -rf "$BASE_NAME" # remove dir
+rm -rf "$FILENAME"  # remove tar.xz file
 
 # Add to PATH (permanent via ~/.zshrc)
 if ! grep -q "$TOOLS_DIR" ~/.zshrc; then
