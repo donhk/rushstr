@@ -1,6 +1,8 @@
-#!/usr/bin/env zsh
-
+#!/usr/bin/zsh
 set -e
+
+WORKDIR="$(pwd)"
+
 
 ARCH="$(uname -m)"
 case "$ARCH" in
@@ -20,14 +22,18 @@ if [[ -z "$LATEST_VERSION" ]]; then
   echo "❌ Could not determine the latest version" && exit 1
 fi
 
-FILENAME="rushstr-${LATEST_VERSION}-${ARCH_ID}.tar.xz"
+BASE_NAME="rushstr-${LATEST_VERSION}-${ARCH_ID}"
+FILENAME="${BASE_NAME}.tar.xz"
 URL="https://github.com/donhk/rushstr/releases/download/${LATEST_VERSION}/${FILENAME}"
 
 echo "⬇️ Downloading $FILENAME..."
 curl -LO "$URL"
 
-echo "📦 Extracting..."
+pushd $TOOLS_DIR
+
+echo "📦 Extracting...$TOOLS_DIR/$FILENAME"
 tar -xf "$FILENAME"
+mv "$TOOLS_DIR/$BASE_NAME/rushstr" "$TOOLS_DIR"
 rm "$FILENAME"
 
 # Add to PATH (permanent via ~/.zshrc)
@@ -36,6 +42,8 @@ if ! grep -q "$TOOLS_DIR" ~/.zshrc; then
   echo "export PATH=\"$TOOLS_DIR:\$PATH\"" >> ~/.zshrc
   echo "🔧 Added rushstr to ~/.zshrc"
 fi
+
+popd
 
 # Generate shell integration
 "$TOOLS_DIR/rushstr" --zsh-shell-conf
