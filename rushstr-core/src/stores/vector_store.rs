@@ -102,35 +102,29 @@ impl StoreTrait for VectorStore {
     }
 
     fn favorites(&self) -> anyhow::Result<usize> {
-        let mut favorites = 0;
-        for result in self.items.iter() {
-            if let Ok(result) = result.lock() {
-                if result.is_fav() {
-                    favorites += 1;
-                }
-            }
-        }
+        let favorites = self
+            .items
+            .iter()
+            .filter_map(|item| item.lock().ok())
+            .filter(|item| item.is_fav())
+            .count();
         Ok(favorites)
     }
 
     fn mark_favorite(&self, id: &Key) {
-        if let Some(h_item) = self.items_index.get(id) {
-            if let Ok(mut h_item) = h_item.lock() {
-                h_item.flip_fav();
-                if let Ok(bytes) = bincode::encode_to_vec(&*h_item, self.config) {
-                    let _ = self.database.insert(h_item.id(), bytes);
-                }
+        if let Some(mut h_item) = self.items_index.get(id).and_then(|item| item.lock().ok()) {
+            h_item.flip_fav();
+            if let Ok(bytes) = bincode::encode_to_vec(&*h_item, self.config) {
+                let _ = self.database.insert(h_item.id(), bytes);
             }
         }
     }
 
     fn mark_hit(&self, id: &Key) {
-        if let Some(h_item) = self.items_index.get(id) {
-            if let Ok(mut h_item) = h_item.lock() {
-                h_item.inc_hits();
-                if let Ok(bytes) = bincode::encode_to_vec(&*h_item, self.config) {
-                    let _ = self.database.insert(h_item.id(), bytes);
-                }
+        if let Some(mut h_item) = self.items_index.get(id).and_then(|item| item.lock().ok()) {
+            h_item.inc_hits();
+            if let Ok(bytes) = bincode::encode_to_vec(&*h_item, self.config) {
+                let _ = self.database.insert(h_item.id(), bytes);
             }
         }
     }
