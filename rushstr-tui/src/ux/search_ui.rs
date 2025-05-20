@@ -61,7 +61,7 @@ impl SearchUI {
                         },
                         KeyCode::Char('c') if key.modifiers == KeyModifiers::CONTROL => {
                             if let Some(cmd) = items.get(ui_state.selected) {
-                                Clipboard::new()?.set_text(cmd.raw_text())?;
+                                copy_to_clipboard(cmd);
                             }
                             return Ok(None);
                         },
@@ -97,6 +97,21 @@ impl SearchUI {
     }
 }
 
+/// Copies the raw text of a command to the system clipboard.
+///
+/// This function first attempts to use the system clipboard via the `arboard`
+/// crate.
+///
+/// # Parameters
+/// - `cmd`: A reference to the `HItem` whose raw text will be copied.
+#[allow(clippy::collapsible_if)]
+fn copy_to_clipboard(cmd: &HItem) {
+    // Try using system clipboard via arboard
+    if let Ok(mut clipboard) = Clipboard::new() {
+        let _ = clipboard.set_text(cmd.raw_text());
+    }
+}
+
 /// Returns the raw text of the currently selected item in the list, if any.
 /// Also marks the item as "hit" in the store.
 ///
@@ -127,7 +142,7 @@ fn get_selected(items: &[HItem], ui_state: &UiState, store: &Store) -> anyhow::R
 /// * `ui_state` - Mutable reference to the UI state.
 /// * `char` - The character to append to the input.
 fn put_char(ui_state: &mut UiState, char: char) {
-    if ui_state.search_options.input.len() < 50 {
+    if ui_state.search_options.input.len() < 150 {
         ui_state.search_options.input.push(char);
         ui_state.selected = 0;
         ui_state.offset = 0;
