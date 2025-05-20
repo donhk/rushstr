@@ -89,7 +89,7 @@ cargo test
 ## 🛠 Update the version
 
 ```zsh
-cargo release 1.4.0 --no-push --no-tag --no-publish --execute
-cargo patch --no-push --no-tag --no-publish --execute
-cargo minor --no-push --no-tag --no-publish --execute
+cargo release major --no-push --no-tag --no-publish --execute
+cargo relase patch --no-push --no-tag --no-publish --execute
+cargo release minor --no-push --no-tag --no-publish --execute
 ```

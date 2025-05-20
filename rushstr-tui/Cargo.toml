@@ -1,6 +1,6 @@
 [package]
 name = "rushstr-tui"
-version = "1.4.1"
+version = "1.4.2"
 edition = "2024"
 description = "An interactive, Rust-powered shell history search tool inspired by hstr"
 license = "MIT"
@@ -14,4 +14,4 @@ ratatui.workspace = true
 anyhow.workspace = true
 arboard.workspace = true
 base64.workspace = true
-rushstr-core = { path = "../rushstr-core", version = "1.4.1" }
+rushstr-core = { path = "../rushstr-core", version = "1.4.2" }
